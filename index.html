@@ -80,13 +80,56 @@
             position: absolute; z-index: 5;
             background: rgba(255,255,255,0.9);
             border: 1px solid rgba(0,0,0,0.1);
-            color: #333333;
-            padding: 5px 12px; border-radius: 6px;
-            font-size: 0.85rem; font-weight: bold;
-            pointer-events: none; transform: translate(-50%, -50%);
-            white-space: nowrap; transition: opacity 0.3s, border-color 0.3s;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            padding: 8px 12px; border-radius: 8px;
+            font-family: sans-serif; font-size: 12px; font-weight: bold;
+            color: #333; pointer-events: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transform: translate(-50%, -50%); transition: opacity 0.3s;
+            opacity: 0;
         }
+
+        /* Tour Guiado UI */
+        #tour-overlay {
+            position: absolute; top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: 30; pointer-events: none; display: none; opacity: 0;
+        }
+        .tour-panel {
+            position: absolute; background: rgba(15, 23, 42, 0.85); /* Dark Glassmorphism */
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 15px;
+            padding: 30px; color: #f8fafc; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+        }
+        .tour-panel h2 { color: #38bdf8; margin: 0 0 15px 0; font-size: 2rem; }
+        .tour-panel h3 { color: #38bdf8; margin: 0 0 10px 0; font-size: 1.5rem; }
+        .tour-panel p { margin: 0; font-size: 1.1rem; line-height: 1.6; color: #cbd5e1; }
+        
+        .center-panel {
+            top: 15%; left: 50%; transform: translate(-50%, -20px);
+            width: 600px; text-align: center; opacity: 0;
+        }
+        .left-panel {
+            top: 50%; left: 40px; transform: translateY(-50%) translateX(-40px);
+            width: 350px; opacity: 0;
+        }
+        .right-panel {
+            top: 50%; right: 40px; transform: translateY(-50%) translateX(40px);
+            width: 350px; opacity: 0; border-left: 4px solid #38bdf8;
+        }
+        
+        .tour-controls {
+            position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
+            display: flex; gap: 20px; pointer-events: auto;
+        }
+        .tour-btn {
+            background: #0ea5e9; color: white; border: none; padding: 12px 24px;
+            border-radius: 30px; font-weight: bold; font-size: 1rem; cursor: pointer;
+            transition: all 0.2s; box-shadow: 0 4px 15px rgba(14, 165, 233, 0.4);
+        }
+        .tour-btn:hover { background: #0284c7; transform: translateY(-2px); }
+        .tour-btn.outline {
+            background: transparent; border: 2px solid #64748b; color: #cbd5e1; box-shadow: none;
+        }
+        .tour-btn.outline:hover { background: rgba(100,116,139,0.2); border-color: #94a3b8; color: white; }
 
         .orbital-label {
             position: absolute; z-index: 4;
@@ -134,6 +177,30 @@
         <h1>StackX Architecture</h1>
         <p>Demostración interactiva del enrutamiento de microservicios. Pasa el cursor sobre un nodo o tubería para revelar su stack tecnológico.</p>
         <button id="traffic-btn" class="btn">Simular Pico de Tráfico (Catálogo)</button>
+    </div>
+
+    <!-- Contenedor del Tour Guiado -->
+    <div id="tour-overlay">
+        <div id="tour-panel-center" class="tour-panel center-panel">
+            <h2 id="tour-center-title"></h2>
+            <p id="tour-center-desc"></p>
+        </div>
+        
+        <div id="tour-panel-left" class="tour-panel side-panel left-panel">
+            <h3 id="tour-left-title"></h3>
+            <p id="tour-left-desc"></p>
+        </div>
+        
+        <div id="tour-panel-right" class="tour-panel side-panel right-panel">
+            <h3 id="tour-right-title"></h3>
+            <p id="tour-right-desc"></p>
+        </div>
+        
+        <div class="tour-controls">
+            <button id="btn-tour-prev" class="tour-btn outline">Anterior</button>
+            <button id="btn-tour-skip" class="tour-btn outline">Omitir Tour</button>
+            <button id="btn-tour-next" class="tour-btn">Siguiente</button>
+        </div>
     </div>
 
     <div id="labels-container" style="opacity: 0;"></div>
@@ -388,14 +455,15 @@
                 onComplete: () => document.getElementById('intro-overlay').style.display = 'none' 
             });
             
-            // Fade in UI y Barra Tech
-            gsap.to('#ui-panel', { opacity: 1, duration: 1, delay: 0.5 });
-            gsap.to('#tech-bar', { opacity: 1, duration: 1, delay: 0.5 });
+            // No mostrar UI normal aún, empezar tour
             gsap.to('#labels-container', { opacity: 1, duration: 1, delay: 1 });
 
             // Animar cámara desde lejos
             camera.position.set(0, 0, 80);
-            gsap.to(camera.position, { z: 25, duration: 2.5, ease: "power3.out" });
+            gsap.to(camera.position, { 
+                z: 25, duration: 2.5, ease: "power3.out",
+                onComplete: startTour
+            });
 
             // Pop-in Nodos
             let delay = 0.5;
@@ -414,7 +482,152 @@
             });
         });
 
-        // --- 6. INTERACTIVIDAD (HOVER & RAYCASTER) ---
+        // --- 5.1 TOUR GUIADO (STORYTELLING) ---
+        let currentTourStep = 0;
+        let isTourActive = false;
+
+        const tourSteps = [
+            { // Paso 1: Introducción a la Arquitectura
+                camPos: { x: 0, y: 0, z: 25 },
+                targetPos: { x: 0, y: 0, z: 0 },
+                focusNode: null,
+                panels: {
+                    center: { 
+                        title: "Evolución a Microservicios ODM", 
+                        desc: "<strong>¿Por qué dejamos atrás el sistema monolítico?</strong><br><br>Elegimos microservicios para dividir una plataforma compleja en nodos independientes. Esto nos da control total, alta disponibilidad y la capacidad de evolucionar cada parte del negocio sin afectar las demás." 
+                    },
+                    left: null, right: null
+                }
+            },
+            { // Paso 2: Alta Disponibilidad
+                camPos: { x: 10, y: -8, z: 15 }, 
+                targetPos: { x: 10, y: -8, z: 6 },
+                focusNode: 'orders', // orders es payments-odm en la lógica
+                panels: {
+                    center: null,
+                    left: { 
+                        title: "1. Tolerancia a Fallos", 
+                        desc: "En el monolito, si el módulo de pagos fallaba, toda la app colapsaba. Con microservicios, si payments-odm tiene intermitencias externas, la app sigue funcionando: los usuarios pueden continuar buscando horarios en journey-odm sin interrupciones." 
+                    },
+                    right: null
+                }
+            },
+            { // Paso 3: Escalabilidad
+                camPos: { x: 14, y: 0, z: 12 },
+                targetPos: { x: 14, y: 0, z: 0 },
+                focusNode: 'catalog', // catalog es journey-odm en la lógica
+                panels: {
+                    center: null,
+                    left: null,
+                    right: { 
+                        title: "2. Escalado Inteligente Bajo Demanda", 
+                        desc: "En temporada alta o ventas nocturnas, la consulta de viajes se dispara. En lugar de pagar por duplicar todo el sistema, asignamos más recursos únicamente a journey-odm, optimizando costos de infraestructura al máximo." 
+                    }
+                }
+            },
+            { // Paso 4: Despliegues
+                camPos: { x: 10, y: 8, z: 12 },
+                targetPos: { x: 10, y: 8, z: -6 },
+                focusNode: 'auth',
+                panels: {
+                    center: null,
+                    left: { 
+                        title: "3. Despliegues Rápidos e Independientes", 
+                        desc: "Podemos actualizar las reglas de inicio de sesión o agregar autenticación con Apple/Google en auth-app-odm y desplegar a producción en minutos, sin necesidad de detener ni reinstalar los demás servicios." 
+                    },
+                    right: null
+                }
+            },
+            { // Paso 5: Mantenimiento
+                camPos: { x: 2, y: -9, z: 12 },
+                targetPos: { x: 2, y: -9, z: 0 },
+                focusNode: 'events', // events es notification-odm en la lógica
+                panels: {
+                    center: null,
+                    left: null,
+                    right: { 
+                        title: "4. Código Especializado y Aislado", 
+                        desc: "Cada servicio realiza una sola tarea y la hace bien. Esto facilita encontrar errores rápidamente, auditar el código y permite que diferentes desarrolladores trabajen en paralelo sin pisarse el trabajo." 
+                    }
+                }
+            }
+        ];
+
+        function hideAllTourPanels() {
+            gsap.killTweensOf(['#tour-panel-center', '#tour-panel-left', '#tour-panel-right']);
+            gsap.set(['#tour-panel-center', '#tour-panel-left', '#tour-panel-right'], { opacity: 0 });
+        }
+
+        function showTourPanel(id, data) {
+            if (!data) return;
+            const panel = document.getElementById(id);
+            const type = id.split('-')[2]; // 'center', 'left', or 'right'
+            document.getElementById(`tour-${type}-title`).innerText = data.title;
+            document.getElementById(`tour-${type}-desc`).innerHTML = data.desc;
+            gsap.to(panel, { opacity: 1, duration: 0.8, delay: 0.2, ease: "power2.out" });
+        }
+
+        function goToTourStep(index, skipCamera = false) {
+            if (index >= tourSteps.length) {
+                endTour();
+                return;
+            }
+            
+            const step = tourSteps[index];
+            currentTourStep = index;
+            
+            // Actualizar Botones
+            document.getElementById('btn-tour-prev').style.display = index === 0 ? 'none' : 'block';
+            document.getElementById('btn-tour-next').innerText = index === tourSteps.length - 1 ? 'Finalizar' : 'Siguiente';
+
+            // Animación de Cámara
+            if (!skipCamera) {
+                gsap.to(camera.position, { x: step.camPos.x, y: step.camPos.y, z: step.camPos.z, duration: 2.5, ease: "power3.inOut" });
+                gsap.to(controls.target, { x: step.targetPos.x, y: step.targetPos.y, z: step.targetPos.z, duration: 2.5, ease: "power3.inOut" });
+            }
+
+            // Foco en Nodo
+            updateSceneState(step.focusNode || null);
+
+            // Paneles
+            hideAllTourPanels();
+            showTourPanel('tour-panel-center', step.panels.center);
+            showTourPanel('tour-panel-left', step.panels.left);
+            showTourPanel('tour-panel-right', step.panels.right);
+        }
+
+        function startTour() {
+            isTourActive = true;
+            controls.enabled = false;
+            document.getElementById('tour-overlay').style.display = 'block';
+            gsap.to('#tour-overlay', { opacity: 1, duration: 1 });
+            goToTourStep(0, true);
+        }
+
+        function endTour() {
+            isTourActive = false;
+            controls.enabled = true;
+            
+            gsap.to('#tour-overlay', { opacity: 0, duration: 0.8, onComplete: () => {
+                document.getElementById('tour-overlay').style.display = 'none';
+            }});
+            
+            // Regresar cámara al centro panorámico
+            gsap.to(camera.position, { x: 0, y: 0, z: 25, duration: 2, ease: "power3.inOut" });
+            gsap.to(controls.target, { x: 0, y: 0, z: 0, duration: 2, ease: "power3.inOut" });
+            
+            updateSceneState(null); // Quitar hover
+            
+            // Mostrar UI normal
+            gsap.to('#ui-panel', { opacity: 1, duration: 1, delay: 0.5 });
+            gsap.to('#tech-bar', { opacity: 1, duration: 1, delay: 0.5 });
+        }
+
+        document.getElementById('btn-tour-next').addEventListener('click', () => goToTourStep(currentTourStep + 1));
+        document.getElementById('btn-tour-prev').addEventListener('click', () => goToTourStep(currentTourStep - 1));
+        document.getElementById('btn-tour-skip').addEventListener('click', endTour);
+
+        // --- 6. INTERACCIÓN (RAYCASTER) ---
         const raycaster = new THREE.Raycaster();
         const mouse = new THREE.Vector2();
         let hoveredId = null;
@@ -496,6 +709,7 @@
 
         window.addEventListener('mousemove', (event) => {
             if (!sceneActive) return; // No permitir interacción hasta que inicie
+            if (isTourActive) return; // Desactivar hover manual durante el tour
             
             mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
             mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
