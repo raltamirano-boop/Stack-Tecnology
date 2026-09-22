@@ -176,7 +176,7 @@
 <body>
     <div id="intro-overlay">
         <h1>ÓMNIBUS DE MÉXICO</h1>
-        <h2>STACKX ARCHITECTURE</h2>
+        <h2>STACK ARCHITECTURE</h2>
         <div class="click-to-start">Haz clic para descubrir la nueva arquitectura</div>
     </div>
 
@@ -208,10 +208,44 @@
         <img id="mascot-img" src="" alt="Tech Mascot">
     </div>
 
-    <!-- Panel de Beneficios de Tecnología (Fase 2) -->
-    <div id="tech-benefits-panel" class="tour-panel left-panel" style="display: none; top: 60%;">
-        <h3 id="tech-benefits-title"></h3>
-        <p id="tech-benefits-desc"></p>
+    <!-- Panel Interactivo de NestJS (Sub-Tour) -->
+    <div id="nestjs-subtour-panel" class="tour-panel left-panel" style="display: none; top: 50%; transform: translateY(-50%) translateX(-20px); width: 450px; padding: 20px; z-index: 100; pointer-events: auto;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #E0234E; padding-bottom: 10px; margin-bottom: 15px;">
+            <h3 id="nest-step-title" style="color: #E0234E; margin: 0; font-size: 1.4rem;">NestJS: Base Crítica</h3>
+            <span id="nest-step-indicator" style="background: #E0234E; color: white; padding: 4px 10px; border-radius: 15px; font-size: 0.8rem; font-weight: bold;">Paso 1 de 8</span>
+        </div>
+        
+        <p id="nest-step-subtitle" style="font-style: italic; color: #64748b; margin-bottom: 10px;"></p>
+        <p id="nest-step-desc" style="font-size: 0.95rem; line-height: 1.5; color: #333; margin-bottom: 15px;"></p>
+        
+        <div id="nest-step-metric" style="display: none; background: #f8fafc; border-left: 4px solid #0ea5e9; padding: 10px; font-weight: bold; color: #0f172a; border-radius: 0 8px 8px 0; margin-bottom: 15px;"></div>
+        
+        <!-- Live Code Preview -->
+        <div id="nest-code-preview" style="background: #1e1e1e; border-radius: 8px; overflow: hidden; margin-bottom: 15px;">
+            <div style="display: flex; background: #2d2d2d; border-bottom: 1px solid #444;">
+                <button class="code-tab active" data-tab="guard" style="background: #1e1e1e; color: #d4d4d4; border: none; padding: 6px 12px; font-size: 0.8rem; cursor: pointer;">AuthGuard.ts</button>
+                <button class="code-tab" data-tab="module" style="background: transparent; color: #888; border: none; padding: 6px 12px; font-size: 0.8rem; cursor: pointer;">AppModule.ts</button>
+                <button class="code-tab" data-tab="fastify" style="background: transparent; color: #888; border: none; padding: 6px 12px; font-size: 0.8rem; cursor: pointer;">main.ts</button>
+            </div>
+            <pre style="margin: 0; padding: 15px; font-size: 0.8rem; color: #9cdcfe; font-family: 'Courier New', Courier, monospace; overflow-x: auto;"><code id="nest-code-content"></code></pre>
+        </div>
+
+        <!-- Botones de Prueba -->
+        <div id="nest-interactive-buttons" style="display: none; gap: 10px; margin-bottom: 15px;">
+            <button id="btn-nest-success" style="flex: 1; background: #10b981; color: white; border: none; padding: 8px; border-radius: 5px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 6px rgba(16, 185, 129, 0.3);">⚡ Login Exitoso (200)</button>
+            <button id="btn-nest-fail" style="flex: 1; background: #ef4444; color: white; border: none; padding: 8px; border-radius: 5px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 6px rgba(239, 68, 68, 0.3);">🚫 Token Inválido (401)</button>
+        </div>
+
+        <!-- Navegación del Sub-Tour -->
+        <div style="display: flex; justify-content: space-between; margin-top: 10px;">
+            <button id="btn-nest-prev" style="background: transparent; border: 1px solid #cbd5e1; color: #475569; padding: 6px 15px; border-radius: 20px; cursor: pointer;">◄ Anterior</button>
+            <button id="btn-nest-next" style="background: #E0234E; border: none; color: white; padding: 6px 15px; border-radius: 20px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(224, 35, 78, 0.3);">Siguiente ►</button>
+        </div>
+        <button id="btn-nest-close" style="position: absolute; top: -15px; right: -15px; background: white; border: 2px solid #cbd5e1; color: #333; width: 30px; height: 30px; border-radius: 50%; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">X</button>
+    </div>
+    <div id="tech-benefits-panel" class="tour-panel left-panel" style="display: none; top: 50%; transform: translateY(-50%) translateX(-20px); width: 400px; padding: 25px; z-index: 100;">
+        <h3 id="tech-benefits-title" style="color: #006cb5; margin-top: 0; font-size: 1.5rem;"></h3>
+        <div id="tech-benefits-desc" style="font-size: 1rem; line-height: 1.6; color: #444;"></div>
     </div>
 
     <div id="ui-panel" style="opacity: 0;">
@@ -1175,10 +1209,14 @@
                     
                     const benefits = techBenefits[target];
                     if(benefits && benefits.title) {
-                        document.getElementById('tech-benefits-title').innerText = benefits.title;
-                        document.getElementById('tech-benefits-desc').innerHTML = benefits.desc;
-                        document.getElementById('tech-benefits-panel').style.display = 'block';
-                        gsap.to('#tech-benefits-panel', { opacity: 1, duration: 0.5 });
+                        if (target === 'auth') {
+                            document.getElementById('tech-benefits-panel').style.display = 'none';
+                        } else {
+                            document.getElementById('tech-benefits-title').innerText = benefits.title;
+                            document.getElementById('tech-benefits-desc').innerHTML = benefits.desc;
+                            document.getElementById('tech-benefits-panel').style.display = 'block';
+                            gsap.to('#tech-benefits-panel', { opacity: 1, duration: 0.5 });
+                        }
                     }
                     
                     if(bgTween) bgTween.kill();
@@ -1202,42 +1240,426 @@
                         { scale: 0.5, opacity: 0 }, 
                         { scale: 1, opacity: 1, duration: 0.8, ease: "elastic.out(1, 0.5)" }
                     );
+
+                    // Si se seleccionó NestJS (auth), activar el Sub-Tour
+                    if (target === 'auth') {
+                        startNestTour();
+                    } else {
+                        endNestTour();
+                    }
                 }
             });
         });
+
+        // --- 6.5 NESTJS SUB-TOUR (8 PASOS) ---
+        let currentNestStep = 0;
+        let isNestTourActive = false;
+        let nestAssets = {}; // Contenedor para assets 3D dinámicos
+
+        const nestTourCodeSnippets = {
+            'guard': `import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+
+@Injectable()
+export class AuthGuard implements CanActivate {
+  constructor(private jwtService: JwtService) {}
+
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const request = context.switchToHttp().getRequest();
+    const token = this.extractTokenFromHeader(request);
+    if (!token) throw new UnauthorizedException();
+    
+    try {
+      const payload = await this.jwtService.verifyAsync(token);
+      request['user'] = payload;
+    } catch {
+      throw new UnauthorizedException();
+    }
+    return true;
+  }
+}`,
+            'module': `import { Module } from '@nestjs/common';
+import { AuthController } from './auth.controller';
+import { AuthService } from './auth.service';
+import { UserRepository } from './user.repository';
+
+@Module({
+  imports: [JwtModule.register({ secret: process.env.JWT_SECRET })],
+  controllers: [AuthController],
+  providers: [
+    AuthService,
+    UserRepository, // DI: Inyectado en AuthService
+  ],
+  exports: [AuthService]
+})
+export class AuthModule {}`,
+            'fastify': `import { NestFactory } from '@nestjs/core';
+import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
+import { AppModule } from './app.module';
+
+async function bootstrap() {
+  const app = await NestFactory.create<NestFastifyApplication>(
+    AppModule,
+    new FastifyAdapter({ logger: true }) // Fastify Engine
+  );
+  
+  app.useGlobalFilters(new HttpExceptionFilter());
+  await app.listen(3000, '0.0.0.0');
+}
+bootstrap();`
+        };
+
+        const nestTourSteps = [
+            {
+                title: "NestJS: La Base de los Servicios Críticos",
+                subtitle: "Estandarización y escalabilidad sobre Node.js.",
+                desc: "Node.js sin un marco estructurado suele derivar en código espagueti y deuda técnica. Elegimos NestJS porque aporta una arquitectura fuertemente tipada sobre TypeScript, ideal para soportar el crecimiento de la App ODM.",
+                metric: "",
+                tab: "module",
+                action: () => {
+                    const node = nodesMap['auth'];
+                    gsap.to(camera.position, { x: node.targetPos.x, y: node.targetPos.y + 4, z: node.targetPos.z + 15, duration: 2, ease: "power2.inOut" });
+                    gsap.to(controls.target, { x: node.targetPos.x, y: node.targetPos.y, z: node.targetPos.z, duration: 2, ease: "power2.inOut" });
+                    
+                    // Zoom cinemático y brillo rojo
+                    node.coreMesh.material.color.setHex(0xE0234E);
+                    if (nestAssets.pulseTween) nestAssets.pulseTween.kill();
+                    nestAssets.pulseTween = gsap.to(node.coreMesh.material, { emissiveIntensity: 1.5, duration: 0.6, yoyo: true, repeat: -1 });
+                    hideNestSubBlocks();
+                    if(nestAssets.shield) nestAssets.shield.visible = false;
+                    if(nestAssets.pipeToEvents) nestAssets.pipeToEvents.visible = false;
+                    pathsMap['auth'].defaultSpeed = 0.0015;
+                }
+            },
+            {
+                title: "1. Arquitectura Modular (Domain Driven)",
+                subtitle: "",
+                desc: "Cada funcionalidad (Auth, User, Tokens) vive en su propio módulo independiente. Esto garantiza que cualquier cambio en la lógica de usuarios no afecte el proceso de autenticación principal.",
+                metric: "📦 Módulos Desacoplados: 100%",
+                tab: "module",
+                action: () => {
+                    showNestSubBlocks();
+                    hideNestNeonLines();
+                }
+            },
+            {
+                title: "2. Inyección de Dependencias (DI)",
+                subtitle: "",
+                desc: "Inspirado en Angular y Spring Boot, el contenedor IoC de NestJS gestiona el ciclo de vida de los servicios. Esto nos permite sustituir servicios reales por Mocks en milisegundos durante las pruebas automatizadas.",
+                metric: "🟢 Cobertura Unit Tests: +92%",
+                tab: "module",
+                action: () => {
+                    showNestNeonLines();
+                }
+            },
+            {
+                title: "3. Protección de Peticiones (Guards & Pipes)",
+                subtitle: "",
+                desc: "En auth-app-odm, los Guards verifican la validez de los tokens JWT antes de ejecutar el controlador, mientras que los ValidationPipes sanitizan la estructura del JSON recibido.",
+                metric: "🛡️ Mitigación de Inyecciones y OWASP Top 10",
+                tab: "guard",
+                action: () => {
+                    activateNestShield();
+                }
+            },
+            {
+                title: "4. Resiliencia y Exception Filters",
+                subtitle: "",
+                desc: "Con los Exception Filters globales, garantizamos que cualquier fallo interno devuelva un payload HTTP estandarizado (RFC 7807), evitando fuga de trazas de código hacia el cliente final.",
+                metric: "",
+                tab: "guard",
+                action: () => {
+                    deactivateNestShield();
+                    triggerNestShockwave();
+                }
+            },
+            {
+                title: "5. Comunicación Asíncrona",
+                subtitle: "Event-Driven Architecture",
+                desc: "NestJS abstrae la capa de transporte. Un mismo código puede responder peticiones HTTP REST a la App ODM y emitir eventos en segundo plano para el envío de SMS y correos transaccionales.",
+                metric: "⚡ Procesamiento de Eventos: Asíncrono",
+                tab: "fastify",
+                action: () => {
+                    showNestSecondaryPipe();
+                }
+            },
+            {
+                title: "6. Motor de Ejecución Optimizado",
+                subtitle: "Fastify Adapter",
+                desc: "Aunque por defecto usa Express, configuramos NestJS sobre el motor Fastify. Esto reduce la sobrecarga de I/O y nos permite procesar hasta 20,000 peticiones por segundo con baja latencia.",
+                metric: "🚀 Latencia Promedio: <12ms",
+                tab: "fastify",
+                action: () => {
+                    pathsMap['auth'].defaultSpeed = 0.005; // Triplicar velocidad
+                }
+            },
+            {
+                title: "7. Consideraciones Técnicas",
+                subtitle: "Trade-offs y Mitigaciones",
+                desc: "<strong>⚠️ Curva de Aprendizaje:</strong> Requiere POO y Decoradores.<br><em>Mitigación: Plantillas base.</em><br><br><strong>⚠️ Cold Start:</strong> Arranque más lento.<br><em>Mitigación: Always-On containers en Kubernetes.</em><br><br><strong>⚠️ Sobre-ingeniería:</strong> Evitar para tareas simples.",
+                metric: "",
+                tab: "module",
+                action: () => {
+                    const node = nodesMap['auth'];
+                    if (nestAssets.pulseTween) nestAssets.pulseTween.kill();
+                    node.coreMesh.material.color.setHex(0xF59E0B);
+                    node.coreMesh.material.emissive.setHex(0xF59E0B);
+                    
+                    // Alejar cámara
+                    gsap.to(camera.position, { x: 5, y: 5, z: 35, duration: 2, ease: "power2.inOut" });
+                    pathsMap['auth'].defaultSpeed = 0.0015;
+                }
+            }
+        ];
+
+        function createNest3DAssets() {
+            if (nestAssets.initialized) return;
+            const node = nodesMap['auth'];
+            
+            // 1. Sub-Bloques
+            nestAssets.subGroup = new THREE.Group();
+            node.group.add(nestAssets.subGroup);
+            
+            const subGeo = new THREE.BoxGeometry(0.8, 0.8, 0.8);
+            const subMat = new THREE.MeshStandardMaterial({ color: 0xE0234E, emissive: 0xE0234E, emissiveIntensity: 0.5 });
+            
+            nestAssets.cMesh = new THREE.Mesh(subGeo, subMat); nestAssets.cMesh.position.set(-1.5, 1.5, 0);
+            nestAssets.sMesh = new THREE.Mesh(subGeo, subMat); nestAssets.sMesh.position.set(1.5, 1.5, 0);
+            nestAssets.rMesh = new THREE.Mesh(subGeo, subMat); nestAssets.rMesh.position.set(0, -1.5, 0);
+            
+            nestAssets.subGroup.add(nestAssets.cMesh, nestAssets.sMesh, nestAssets.rMesh);
+            nestAssets.subGroup.visible = false;
+            
+            // 2. Neon Lines (Dependencias)
+            const lineGeo1 = new THREE.BufferGeometry().setFromPoints([nestAssets.cMesh.position, nestAssets.sMesh.position]);
+            const lineGeo2 = new THREE.BufferGeometry().setFromPoints([nestAssets.sMesh.position, nestAssets.rMesh.position]);
+            const lineMat = new THREE.LineBasicMaterial({ color: 0x00ffff, linewidth: 2 });
+            nestAssets.line1 = new THREE.Line(lineGeo1, lineMat);
+            nestAssets.line2 = new THREE.Line(lineGeo2, lineMat);
+            nestAssets.subGroup.add(nestAssets.line1, nestAssets.line2);
+            nestAssets.line1.visible = false; nestAssets.line2.visible = false;
+
+            // 3. Shield
+            const shieldGeo = new THREE.SphereGeometry(2.5, 32, 32);
+            const shieldMat = new THREE.MeshBasicMaterial({ color: 0x10b981, transparent: true, opacity: 0.2, wireframe: true });
+            nestAssets.shield = new THREE.Mesh(shieldGeo, shieldMat);
+            node.group.add(nestAssets.shield);
+            nestAssets.shield.visible = false;
+
+            // 4. Shockwave
+            const shockGeo = new THREE.RingGeometry(1, 1.2, 32);
+            const shockMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0, side: THREE.DoubleSide });
+            nestAssets.shockwave = new THREE.Mesh(shockGeo, shockMat);
+            node.group.add(nestAssets.shockwave);
+
+            // 5. Pipe to Events
+            const endPos = nodesMap['events'].targetPos;
+            const startPos = node.targetPos;
+            const mid = new THREE.Vector3().addVectors(startPos, endPos).multiplyScalar(0.5);
+            mid.y += 3;
+            const pipeCurve = new THREE.CatmullRomCurve3([startPos, mid, endPos]);
+            const pipeGeo = new THREE.TubeGeometry(pipeCurve, 64, 0.05, 8, false);
+            const pipeMat = new THREE.MeshStandardMaterial({ color: 0xE0234E, transparent: true, opacity: 0.6, emissive: 0xE0234E });
+            nestAssets.pipeToEvents = new THREE.Mesh(pipeGeo, pipeMat);
+            scene.add(nestAssets.pipeToEvents);
+            nestAssets.pipeToEvents.visible = false;
+
+            nestAssets.initialized = true;
+        }
+
+        function showNestSubBlocks() {
+            const node = nodesMap['auth'];
+            gsap.to(node.coreMesh.scale, { x: 0.01, y: 0.01, z: 0.01, duration: 0.5 });
+            nestAssets.subGroup.visible = true;
+            gsap.fromTo(nestAssets.subGroup.scale, { x: 0.01, y: 0.01, z: 0.01 }, { x: 1, y: 1, z: 1, duration: 1, ease: "elastic.out(1, 0.5)" });
+        }
+
+        function hideNestSubBlocks() {
+            const node = nodesMap['auth'];
+            gsap.to(node.coreMesh.scale, { x: 1, y: 1, z: 1, duration: 0.5 });
+            if (nestAssets.subGroup) nestAssets.subGroup.visible = false;
+        }
+
+        function showNestNeonLines() {
+            nestAssets.line1.visible = true;
+            nestAssets.line2.visible = true;
+            gsap.fromTo(nestAssets.line1.material, { opacity: 0 }, { opacity: 1, duration: 0.5, yoyo: true, repeat: -1 });
+        }
+
+        function hideNestNeonLines() {
+            if(nestAssets.line1) nestAssets.line1.visible = false;
+            if(nestAssets.line2) nestAssets.line2.visible = false;
+        }
+
+        function activateNestShield() {
+            nestAssets.shield.visible = true;
+            gsap.fromTo(nestAssets.shield.scale, { x: 0.1, y: 0.1, z: 0.1 }, { x: 1, y: 1, z: 1, duration: 0.5, ease: "back.out(1.7)" });
+            gsap.to(nestAssets.shield.material, { opacity: 0.4, duration: 0.5 });
+        }
+
+        function deactivateNestShield() {
+            if (nestAssets.shield) {
+                gsap.to(nestAssets.shield.scale, { x: 0.1, y: 0.1, z: 0.1, duration: 0.3, onComplete: () => nestAssets.shield.visible = false });
+            }
+        }
+
+        function triggerNestShockwave() {
+            nestAssets.shockwave.visible = true;
+            nestAssets.shockwave.scale.set(1, 1, 1);
+            nestAssets.shockwave.material.opacity = 1;
+            gsap.to(nestAssets.shockwave.scale, { x: 8, y: 8, duration: 1, ease: "power2.out" });
+            gsap.to(nestAssets.shockwave.material, { opacity: 0, duration: 1, onComplete: () => nestAssets.shockwave.visible = false });
+        }
+
+        function showNestSecondaryPipe() {
+            nestAssets.pipeToEvents.visible = true;
+            gsap.fromTo(nestAssets.pipeToEvents.scale, { x: 0.01, y: 0.01, z: 0.01 }, { x: 1, y: 1, z: 1, duration: 1, ease: "power2.out" });
+        }
+
+        function updateNestUI() {
+            const step = nestTourSteps[currentNestStep];
+            document.getElementById('nest-step-title').innerText = step.title;
+            document.getElementById('nest-step-indicator').innerText = `Paso ${currentNestStep + 1} de 8`;
+            document.getElementById('nest-step-subtitle').innerText = step.subtitle;
+            document.getElementById('nest-step-desc').innerHTML = step.desc;
+            
+            const metricEl = document.getElementById('nest-step-metric');
+            if (step.metric) {
+                metricEl.innerText = step.metric;
+                metricEl.style.display = 'block';
+            } else {
+                metricEl.style.display = 'none';
+            }
+
+            // Update Tabs
+            document.querySelectorAll('.code-tab').forEach(t => t.classList.remove('active'));
+            document.querySelector(`.code-tab[data-tab="${step.tab}"]`).classList.add('active');
+            document.getElementById('nest-code-content').innerText = nestTourCodeSnippets[step.tab];
+
+            // Interactive Buttons display
+            const btnContainer = document.getElementById('nest-interactive-buttons');
+            if (currentNestStep === 3) {
+                btnContainer.style.display = 'flex';
+            } else {
+                btnContainer.style.display = 'none';
+            }
+
+            // Nav buttons
+            document.getElementById('btn-nest-prev').style.display = currentNestStep === 0 ? 'none' : 'block';
+            document.getElementById('btn-nest-next').innerText = currentNestStep === 7 ? 'Cerrar' : 'Siguiente ►';
+        }
+
+        function startNestTour() {
+            isNestTourActive = true;
+            currentNestStep = 0;
+            createNest3DAssets();
+            document.getElementById('nestjs-subtour-panel').style.display = 'block';
+            gsap.to('#nestjs-subtour-panel', { opacity: 1, duration: 0.5 });
+            updateNestUI();
+            nestTourSteps[0].action();
+        }
+
+        function endNestTour() {
+            isNestTourActive = false;
+            document.getElementById('nestjs-subtour-panel').style.display = 'none';
+            
+            // Revert 3D changes
+            const node = nodesMap['auth'];
+            if(node) {
+                if (nestAssets.pulseTween) nestAssets.pulseTween.kill();
+                node.coreMesh.material.color.setHex(node.originalColor);
+                node.coreMesh.material.emissive.setHex(node.originalEmissive);
+                node.coreMesh.scale.set(1, 1, 1);
+                pathsMap['auth'].defaultSpeed = 0.0015;
+            }
+            if (nestAssets.subGroup) nestAssets.subGroup.visible = false;
+            if (nestAssets.shield) nestAssets.shield.visible = false;
+            if (nestAssets.pipeToEvents) nestAssets.pipeToEvents.visible = false;
+        }
+
+        document.getElementById('btn-nest-next').addEventListener('click', () => {
+            if (currentNestStep < 7) {
+                currentNestStep++;
+                updateNestUI();
+                nestTourSteps[currentNestStep].action();
+            } else {
+                endNestTour();
+            }
+        });
+
+        document.getElementById('btn-nest-prev').addEventListener('click', () => {
+            if (currentNestStep > 0) {
+                currentNestStep--;
+                updateNestUI();
+                nestTourSteps[currentNestStep].action();
+            }
+        });
+
+        document.getElementById('btn-nest-close').addEventListener('click', endNestTour);
+
+        // Code Tabs interaction
+        document.querySelectorAll('.code-tab').forEach(tab => {
+            tab.addEventListener('click', (e) => {
+                document.querySelectorAll('.code-tab').forEach(t => t.classList.remove('active'));
+                e.target.classList.add('active');
+                document.getElementById('nest-code-content').innerText = nestTourCodeSnippets[e.target.getAttribute('data-tab')];
+            });
+        });
+
+        // Interactive Buttons action
+        document.getElementById('btn-nest-success').addEventListener('click', () => {
+            const node = nodesMap['auth'];
+            node.coreMesh.material.color.setHex(0x10b981);
+            node.coreMesh.material.emissive.setHex(0x10b981);
+            setTimeout(() => {
+                node.coreMesh.material.color.setHex(0xE0234E);
+                node.coreMesh.material.emissive.setHex(0xE0234E);
+            }, 500);
+        });
+
+        document.getElementById('btn-nest-fail').addEventListener('click', () => {
+            if(nestAssets.shield) {
+                nestAssets.shield.material.color.setHex(0xef4444);
+                gsap.to(nestAssets.shield.scale, { x: 1.2, y: 1.2, z: 1.2, duration: 0.1, yoyo: true, repeat: 1 });
+                setTimeout(() => nestAssets.shield.material.color.setHex(0x10b981), 400);
+            }
+        });
+
 
         // --- 7. PICO DE TRÁFICO (Simulación) ---
         let isTrafficPeak = false;
         const trafficBtn = document.getElementById('traffic-btn');
         
-        trafficBtn.addEventListener('click', () => {
-            isTrafficPeak = !isTrafficPeak;
-            const path = pathsMap['catalog'];
-            
-            if (isTrafficPeak) {
-                trafficBtn.innerText = "Detener Simulación";
-                trafficBtn.style.background = "#ff3355";
+        if (trafficBtn) {
+            trafficBtn.addEventListener('click', () => {
+                isTrafficPeak = !isTrafficPeak;
+                const path = pathsMap['catalog'];
                 
-                path.instancedMesh.count = MAX_PARTICLES;
-                path.instances.forEach(inst => {
-                    inst.active = true;
-                    inst.speed = 0.01 + Math.random() * 0.01;
-                });
-                // Alert on node
-                gsap.to(nodesMap['catalog'].coreMesh.scale, { x: 1.3, y: 1.3, z: 1.3, duration: 0.2, yoyo: true, repeat: -1 });
-            } else {
-                trafficBtn.innerText = "Simular Pico de Tráfico (Catálogo)";
-                trafficBtn.style.background = "#e31837";
-                
-                path.instancedMesh.count = 40;
-                path.instances.forEach((inst, idx) => {
-                    inst.active = idx < 40;
-                    inst.speed = path.defaultSpeed + Math.random()*0.001;
-                });
-                gsap.killTweensOf(nodesMap['catalog'].coreMesh.scale);
-                gsap.to(nodesMap['catalog'].coreMesh.scale, { x: 1, y: 1, z: 1, duration: 0.5 });
-            }
-        });
+                if (isTrafficPeak) {
+                    trafficBtn.innerText = "Detener Simulación";
+                    trafficBtn.style.background = "#ff3355";
+                    
+                    path.instancedMesh.count = MAX_PARTICLES;
+                    path.instances.forEach(inst => {
+                        inst.active = true;
+                        inst.speed = 0.01 + Math.random() * 0.01;
+                    });
+                    // Alert on node
+                    gsap.to(nodesMap['catalog'].coreMesh.scale, { x: 1.3, y: 1.3, z: 1.3, duration: 0.2, yoyo: true, repeat: -1 });
+                } else {
+                    trafficBtn.innerText = "Simular Pico de Tráfico (Catálogo)";
+                    trafficBtn.style.background = "#e31837";
+                    
+                    path.instancedMesh.count = 40;
+                    path.instances.forEach((inst, idx) => {
+                        inst.active = idx < 40;
+                        inst.speed = path.defaultSpeed + Math.random()*0.001;
+                    });
+                    gsap.killTweensOf(nodesMap['catalog'].coreMesh.scale);
+                    gsap.to(nodesMap['catalog'].coreMesh.scale, { x: 1, y: 1, z: 1, duration: 0.5 });
+                }
+            });
+        }
 
         // --- 8. BUCLE DE RENDERIZADO ---
         const dummy = new THREE.Object3D();
