@@ -173,6 +173,12 @@
         <img id="mascot-img" src="" alt="Tech Mascot">
     </div>
 
+    <!-- Panel de Beneficios de Tecnología (Fase 2) -->
+    <div id="tech-benefits-panel" class="tour-panel left-panel" style="display: none; top: 60%;">
+        <h3 id="tech-benefits-title"></h3>
+        <p id="tech-benefits-desc"></p>
+    </div>
+
     <div id="ui-panel" style="opacity: 0;">
         <h1>StackX Architecture</h1>
         <p>Demostración interactiva del enrutamiento de microservicios. Pasa el cursor sobre un nodo o tubería para revelar su stack tecnológico.</p>
@@ -283,6 +289,15 @@
         const sphereGeo = new THREE.SphereGeometry(0.5, 16, 16);
         const diamondGeo = new THREE.OctahedronGeometry(0.5, 0);
 
+        const textureLoader = new THREE.TextureLoader();
+        const iconPaths = {
+            'origin': 'assets/mobile_app.jpg',
+            'auth': 'assets/auth_lock.jpg',
+            'catalog': 'assets/bus_route.jpg',
+            'orders': 'assets/credit_card.jpg',
+            'events': 'assets/notification_bell.jpg'
+        };
+
         // --- 3. CREACIÓN DE NODOS Y ANILLOS ORBITALES ---
         function createEcosystem(id, data) {
             const group = new THREE.Group();
@@ -302,6 +317,38 @@
             const lineMat = new THREE.LineBasicMaterial({ color: 0x333333, transparent: true, opacity: 0.3 });
             const edgesMesh = new THREE.LineSegments(edges, lineMat);
             coreMesh.add(edgesMesh);
+            
+            // Iconos en las 4 caras verticales
+            if (iconPaths[id]) {
+                const iconGeo = new THREE.PlaneGeometry(1.6, 1.6);
+                const tex = textureLoader.load(iconPaths[id]);
+                const iconMat = new THREE.MeshBasicMaterial({ 
+                    map: tex, transparent: true, opacity: 0.9
+                });
+                
+                // Frente
+                const front = new THREE.Mesh(iconGeo, iconMat);
+                front.position.z = 1.01;
+                coreMesh.add(front);
+
+                // Atrás
+                const back = new THREE.Mesh(iconGeo, iconMat);
+                back.position.z = -1.01;
+                back.rotation.y = Math.PI;
+                coreMesh.add(back);
+
+                // Derecha
+                const right = new THREE.Mesh(iconGeo, iconMat);
+                right.position.x = 1.01;
+                right.rotation.y = Math.PI / 2;
+                coreMesh.add(right);
+
+                // Izquierda
+                const left = new THREE.Mesh(iconGeo, iconMat);
+                left.position.x = -1.01;
+                left.rotation.y = -Math.PI / 2;
+                coreMesh.add(left);
+            }
             
             group.add(coreMesh);
             coreMesh.userData = { isNode: true, id: id };
@@ -550,6 +597,57 @@
                         desc: "Cada servicio realiza una sola tarea y la hace bien. Esto facilita encontrar errores rápidamente, auditar el código y permite que diferentes desarrolladores trabajen en paralelo sin pisarse el trabajo." 
                     }
                 }
+            },
+            { // Paso 6: Seguridad Centralizada
+                camPos: { x: 5, y: -9, z: 25 },
+                targetPos: { x: 5, y: -9, z: 0 },
+                focusNode: 'events',
+                panels: {
+                    center: null,
+                    left: { 
+                        title: "5. Seguridad y Aislamiento", 
+                        desc: "<strong>Aislamiento de Superficie de Ataque:</strong> Si hay un fallo de seguridad en notification-odm, el atacante no puede saltar automáticamente a la base de datos de payments-odm.<br><br><strong>Cumplimiento y Gobernanza:</strong> Facilita auditorías de normativas (como PCI-DSS para tarjetas), aplicándose estrictamente al microservicio afectado y no a toda la empresa." 
+                    },
+                    right: null
+                }
+            },
+            { // Paso 7: Autonomía de Datos
+                camPos: { x: 10, y: 10, z: 20 },
+                targetPos: { x: 12, y: 13, z: -10 },
+                focusNode: 'auth',
+                panels: {
+                    center: null,
+                    left: null,
+                    right: { 
+                        title: "6. Autonomía de Datos (DB per Service)", 
+                        desc: "<strong>Bases de datos independientes:</strong> Cada microservicio es dueño de su propia base de datos (como la de auth-app-odm).<br><br><strong>Cero Acoplamiento:</strong> Se eliminan las tablas compartidas y los joins masivos. Si un servicio necesita datos de otro, lo solicita mediante contratos de API bien definidos." 
+                    }
+                }
+            },
+            { // Paso 8: TCO
+                camPos: { x: 14, y: 0, z: 18 },
+                targetPos: { x: 14, y: 0, z: 0 },
+                focusNode: 'catalog',
+                panels: {
+                    center: null,
+                    left: { 
+                        title: "7. Reducción del Costo Operativo (TCO)", 
+                        desc: "<strong>Eficiencia en la Nube:</strong> El auto-escalado dinámico permite que los servidores crezcan en temporada alta y se reduzcan en la noche, optimizando la factura.<br><br><strong>Evolución sin Reescrituras:</strong> Si el motor de journey-odm queda obsoleto, se rediseña solo ese módulo sin tirar a la basura todo el sistema." 
+                    },
+                    right: null
+                }
+            },
+            { // Paso 9: Gobernanza
+                camPos: { x: 0, y: 0, z: 35 },
+                targetPos: { x: 0, y: 0, z: 0 },
+                focusNode: null,
+                panels: {
+                    center: { 
+                        title: "8. Equipos en Paralelo", 
+                        desc: "<strong>Equipos Desacoplados:</strong> El equipo de pagos puede lanzar mejoras sin coordinar ventanas de mantenimiento con el front-end.<br><br><strong>Cero Conflictos:</strong> Al trabajar en repositorios separados, se eliminan los cuellos de botella (Merge Conflicts) durante las entregas de código." 
+                    },
+                    left: null, right: null
+                }
             }
         ];
 
@@ -745,6 +843,17 @@
         const currentBg2 = new THREE.Color('#ffffff');
         const defaultBg = new THREE.Color('#ffffff');
 
+        const techBenefits = {
+            'auth': {
+                title: "Beneficios de NestJS",
+                desc: "<ul><li style='margin-bottom:8px;'><strong>Arquitectura Enterprise:</strong> Estructura modular y fuertemente tipada (TypeScript) inspirada en Angular.</li><li style='margin-bottom:8px;'><strong>Inyección de Dependencias:</strong> Patrón de diseño robusto para sistemas escalables.</li><li><strong>Ideal para Autenticación:</strong> Middleware y Guards nativos que facilitan asegurar el perímetro del negocio.</li></ul>"
+            },
+            'catalog': { title: "", desc: "" },
+            'orders': { title: "", desc: "" },
+            'events': { title: "", desc: "" },
+            'dotnet': { title: "", desc: "" }
+        };
+
         document.querySelectorAll('.tech-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const target = e.target.getAttribute('data-target');
@@ -766,6 +875,11 @@
                     forcedId = null;
                     if(bgTween) bgTween.kill();
                     
+                    gsap.to('#tech-benefits-panel', { 
+                        opacity: 0, duration: 0.5, 
+                        onComplete: () => document.getElementById('tech-benefits-panel').style.display = 'none' 
+                    });
+                    
                     bgTween = gsap.to([currentBg1, currentBg2], {
                         r: defaultBg.r, g: defaultBg.g, b: defaultBg.b, duration: 1,
                         onUpdate: () => { 
@@ -783,6 +897,14 @@
                     forcedId = target;
                     e.target.classList.add('active');
                     e.target.style.background = '#' + color1.getHexString();
+                    
+                    const benefits = techBenefits[target];
+                    if(benefits && benefits.title) {
+                        document.getElementById('tech-benefits-title').innerText = benefits.title;
+                        document.getElementById('tech-benefits-desc').innerHTML = benefits.desc;
+                        document.getElementById('tech-benefits-panel').style.display = 'block';
+                        gsap.to('#tech-benefits-panel', { opacity: 1, duration: 0.5 });
+                    }
                     
                     if(bgTween) bgTween.kill();
                     
