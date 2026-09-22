@@ -1,0 +1,153 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap');
+
+:root {
+  --bg-color: #0d1117;
+  --surface: rgba(22, 27, 34, 0.7);
+  --surface-border: rgba(255, 255, 255, 0.1);
+  --text-primary: #c9d1d9;
+  --text-secondary: #8b949e;
+  --accent: #58a6ff;
+  --accent-glow: rgba(88, 166, 255, 0.2);
+}
+
+body {
+  margin: 0;
+  font-family: 'Outfit', sans-serif;
+  background-color: var(--bg-color); /* Fallback */
+  color: var(--text-primary);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+#renderCanvas {
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  outline: none;
+}
+
+.presentation-container {
+  width: 90vw;
+  max-width: 1100px;
+  height: 80vh;
+  background: rgba(22, 27, 34, 0.5);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--surface-border);
+  border-radius: 24px;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+.slide-content {
+  flex: 1;
+  padding: 3rem 4rem;
+  display: flex;
+  flex-direction: column;
+  animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  overflow-y: auto;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+h1 {
+  font-size: 2.8rem;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(90deg, #ffffff, #8b949e);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+h2 { font-size: 2.2rem; margin-top: 0; }
+.subtitle { font-size: 1.3rem; color: var(--text-secondary); margin-bottom: 2rem; }
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--surface-border);
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+}
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.3);
+  border-color: rgba(255,255,255,0.2);
+}
+
+.card h3 { margin-top: 0; display: flex; align-items: center; gap: 0.5rem; font-size: 1.2rem; }
+.card ul { margin: 0; padding-left: 1.2rem; }
+.card li { margin-bottom: 0.5rem; line-height: 1.5; }
+
+.success { color: #3fb950; }
+.danger { color: #f85149; }
+.info { color: #58a6ff; }
+.warning { color: #d29922; }
+
+/* Table */
+table { width: 100%; border-collapse: collapse; margin-top: 1rem; background: rgba(0,0,0,0.2); border-radius: 12px; overflow: hidden; }
+th, td { padding: 1rem 1.5rem; text-align: left; border-bottom: 1px solid var(--surface-border); }
+th { font-weight: 600; color: #fff; background: rgba(255,255,255,0.05); }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(255,255,255,0.02); }
+
+/* Controls */
+.controls {
+  padding: 1.2rem 4rem;
+  border-top: 1px solid var(--surface-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(0,0,0,0.3);
+}
+
+.btn {
+  background: rgba(255,255,255,0.05);
+  color: #fff;
+  border: 1px solid var(--surface-border);
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.btn:hover:not(:disabled) { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 20px var(--accent-glow); transform: scale(1.05); }
+.btn:active:not(:disabled) { transform: scale(0.95); }
+.btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+.slide-number { font-variant-numeric: tabular-nums; color: var(--text-secondary); font-weight: 600; font-size: 1.1rem; }
+
+/* HTMX */
+.htmx-indicator { opacity: 0; transition: opacity 200ms ease-in; }
+.htmx-request .htmx-indicator { opacity: 1; }
+.htmx-request.htmx-indicator { opacity: 1; }
+
+/* Tech Tags */
+.tag { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.8rem; font-weight: 600; margin-left: 0.5rem; }
+.tag-nestjs { background: rgba(234, 40, 69, 0.2); color: #ff7b8c; }
+.tag-spring { background: rgba(109, 179, 63, 0.2); color: #8ce354; }
+.tag-fastapi { background: rgba(0, 150, 136, 0.2); color: #4db6ac; }
+.tag-go { background: rgba(0, 173, 216, 0.2); color: #63d6f5; }
