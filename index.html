@@ -62,8 +62,10 @@
             display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
         #mascot-container img {
-            width: 200px; height: 200px;
-            filter: drop-shadow(0 15px 25px rgba(0,0,0,0.4));
+            width: 300px; height: 300px;
+            border-radius: 40px;
+            mix-blend-mode: multiply;
+            filter: contrast(1.1);
         }
         
         .btn {
@@ -116,11 +118,11 @@
 
     <!-- Barra de Tecnologías -->
     <div id="tech-bar">
-        <button class="tech-btn" data-target="auth" data-color="#3178C6" data-icon="https://cdn.simpleicons.org/typescript/ffffff">NestJS</button>
-        <button class="tech-btn" data-target="catalog" data-color="#3776AB" data-icon="https://cdn.simpleicons.org/python/ffffff">FastAPI</button>
-        <button class="tech-btn" data-target="orders" data-color="#ED8B00" data-icon="https://cdn.simpleicons.org/java/ffffff">Spring Boot</button>
-        <button class="tech-btn" data-target="events" data-color="#00ADD8" data-icon="https://cdn.simpleicons.org/go/ffffff">Go</button>
-        <button class="tech-btn" data-target="dotnet" data-color="#512BD4" data-icon="https://cdn.simpleicons.org/csharp/ffffff">.NET</button>
+        <button class="tech-btn" data-target="auth" data-color1="#3178C6" data-color2="#235a97" data-icon="assets/ts.jpg">NestJS</button>
+        <button class="tech-btn" data-target="catalog" data-color1="#3776AB" data-color2="#FFD43B" data-icon="assets/py.jpg">FastAPI</button>
+        <button class="tech-btn" data-target="orders" data-color1="#ED8B00" data-color2="#007396" data-icon="assets/java.jpg">Spring Boot</button>
+        <button class="tech-btn" data-target="events" data-color1="#00ADD8" data-color2="#007d9c" data-icon="assets/go.jpg">Go</button>
+        <button class="tech-btn" data-target="dotnet" data-color1="#512BD4" data-color2="#240046" data-icon="assets/cs.jpg">.NET</button>
     </div>
 
     <!-- Mascota / Logo Overlay -->
@@ -525,15 +527,20 @@
         // Eventos de la Barra de Tecnologías
         let forcedId = null;
         let bgTween = null;
-        const defaultBg = new THREE.Color(0xffffff);
-        const currentBg = new THREE.Color(0xffffff);
+        const currentBg1 = new THREE.Color('#ffffff');
+        const currentBg2 = new THREE.Color('#ffffff');
+        const defaultBg = new THREE.Color('#ffffff');
 
         document.querySelectorAll('.tech-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const target = e.target.getAttribute('data-target');
-                const colorStr = e.target.getAttribute('data-color');
+                const color1 = new THREE.Color(e.target.getAttribute('data-color1'));
+                const color2 = new THREE.Color(e.target.getAttribute('data-color2'));
                 const iconSrc = e.target.getAttribute('data-icon');
                 
+                // Asegurarse de que el renderizador sea transparente y el DOM controle el fondo
+                scene.background = null;
+
                 // Resetear todos los botones
                 document.querySelectorAll('.tech-btn').forEach(b => {
                     b.classList.remove('active');
@@ -541,27 +548,41 @@
                 });
 
                 if (forcedId === target) {
-                    // Desactivar: Regresar a fondo blanco y ocultar mascota
+                    // Desactivar: Regresar a fondo blanco
                     forcedId = null;
                     if(bgTween) bgTween.kill();
-                    bgTween = gsap.to(currentBg, {
+                    
+                    bgTween = gsap.to([currentBg1, currentBg2], {
                         r: defaultBg.r, g: defaultBg.g, b: defaultBg.b, duration: 1,
-                        onUpdate: () => { scene.background = currentBg; scene.fog.color = currentBg; }
+                        onUpdate: () => { 
+                            const hex1 = '#' + currentBg1.getHexString();
+                            const hex2 = '#' + currentBg2.getHexString();
+                            document.body.style.background = `linear-gradient(135deg, ${hex1}, ${hex2})`;
+                            scene.fog.color.copy(currentBg1); 
+                        }
                     });
                     
                     gsap.to('#mascot-container', { opacity: 0, scale: 0.5, duration: 0.5, ease: "back.in(1.7)" });
                     
                 } else {
-                    // Activar: Cambiar fondo y mostrar mascota
+                    // Activar: Cambiar a gradiente de la tecnología
                     forcedId = target;
                     e.target.classList.add('active');
-                    e.target.style.background = colorStr;
+                    e.target.style.background = '#' + color1.getHexString();
                     
-                    const targetBg = new THREE.Color(colorStr);
                     if(bgTween) bgTween.kill();
-                    bgTween = gsap.to(currentBg, {
-                        r: targetBg.r, g: targetBg.g, b: targetBg.b, duration: 1,
-                        onUpdate: () => { scene.background = currentBg; scene.fog.color = currentBg; }
+                    
+                    bgTween = gsap.to([currentBg1, currentBg2], {
+                        r: (i) => i === 0 ? color1.r : color2.r,
+                        g: (i) => i === 0 ? color1.g : color2.g,
+                        b: (i) => i === 0 ? color1.b : color2.b,
+                        duration: 1,
+                        onUpdate: () => { 
+                            const hex1 = '#' + currentBg1.getHexString();
+                            const hex2 = '#' + currentBg2.getHexString();
+                            document.body.style.background = `linear-gradient(135deg, ${hex1}, ${hex2})`;
+                            scene.fog.color.copy(currentBg1); 
+                        }
                     });
 
                     const mascotImg = document.getElementById('mascot-img');
