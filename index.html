@@ -96,24 +96,24 @@
         .tour-panel {
             position: absolute; background: rgba(15, 23, 42, 0.85); /* Dark Glassmorphism */
             backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255,255,255,0.1); border-radius: 15px;
-            padding: 30px; color: #f8fafc; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 12px;
+            padding: 20px 25px; color: #f8fafc; box-shadow: 0 15px 30px -10px rgba(0,0,0,0.5);
         }
-        .tour-panel h2 { color: #38bdf8; margin: 0 0 15px 0; font-size: 2rem; }
-        .tour-panel h3 { color: #38bdf8; margin: 0 0 10px 0; font-size: 1.5rem; }
-        .tour-panel p { margin: 0; font-size: 1.1rem; line-height: 1.6; color: #cbd5e1; }
+        .tour-panel h2 { color: #38bdf8; margin: 0 0 10px 0; font-size: 1.6rem; }
+        .tour-panel h3 { color: #38bdf8; margin: 0 0 8px 0; font-size: 1.2rem; }
+        .tour-panel p { margin: 0; font-size: 0.95rem; line-height: 1.5; color: #cbd5e1; }
         
         .center-panel {
             top: 15%; left: 50%; transform: translate(-50%, -20px);
-            width: 600px; text-align: center; opacity: 0;
+            width: 480px; text-align: center; opacity: 0;
         }
         .left-panel {
-            top: 50%; left: 40px; transform: translateY(-50%) translateX(-40px);
-            width: 350px; opacity: 0;
+            top: 50%; left: 30px; transform: translateY(-50%) translateX(-40px);
+            width: 300px; opacity: 0;
         }
         .right-panel {
-            top: 50%; right: 40px; transform: translateY(-50%) translateX(40px);
-            width: 350px; opacity: 0; border-left: 4px solid #38bdf8;
+            top: 50%; right: 30px; transform: translateY(-50%) translateX(40px);
+            width: 300px; opacity: 0; border-left: 4px solid #38bdf8;
         }
         
         .tour-controls {
@@ -459,9 +459,9 @@
             gsap.to('#labels-container', { opacity: 1, duration: 1, delay: 1 });
 
             // Animar cámara desde lejos
-            camera.position.set(0, 0, 80);
+            camera.position.set(0, 0, 90);
             gsap.to(camera.position, { 
-                z: 25, duration: 2.5, ease: "power3.out",
+                z: 35, duration: 2.5, ease: "power3.out",
                 onComplete: startTour
             });
 
@@ -488,7 +488,7 @@
 
         const tourSteps = [
             { // Paso 1: Introducción a la Arquitectura
-                camPos: { x: 0, y: 0, z: 25 },
+                camPos: { x: 0, y: 0, z: 35 },
                 targetPos: { x: 0, y: 0, z: 0 },
                 focusNode: null,
                 panels: {
@@ -500,7 +500,7 @@
                 }
             },
             { // Paso 2: Alta Disponibilidad
-                camPos: { x: 10, y: -8, z: 15 }, 
+                camPos: { x: 10, y: -8, z: 20 }, 
                 targetPos: { x: 10, y: -8, z: 6 },
                 focusNode: 'orders', // orders es payments-odm en la lógica
                 panels: {
@@ -513,7 +513,7 @@
                 }
             },
             { // Paso 3: Escalabilidad
-                camPos: { x: 14, y: 0, z: 12 },
+                camPos: { x: 14, y: 0, z: 18 },
                 targetPos: { x: 14, y: 0, z: 0 },
                 focusNode: 'catalog', // catalog es journey-odm en la lógica
                 panels: {
@@ -526,7 +526,7 @@
                 }
             },
             { // Paso 4: Despliegues
-                camPos: { x: 10, y: 8, z: 12 },
+                camPos: { x: 10, y: 8, z: 18 },
                 targetPos: { x: 10, y: 8, z: -6 },
                 focusNode: 'auth',
                 panels: {
@@ -539,7 +539,7 @@
                 }
             },
             { // Paso 5: Mantenimiento
-                camPos: { x: 2, y: -9, z: 12 },
+                camPos: { x: 2, y: -9, z: 18 },
                 targetPos: { x: 2, y: -9, z: 0 },
                 focusNode: 'events', // events es notification-odm en la lógica
                 panels: {
@@ -613,7 +613,7 @@
             }});
             
             // Regresar cámara al centro panorámico
-            gsap.to(camera.position, { x: 0, y: 0, z: 25, duration: 2, ease: "power3.inOut" });
+            gsap.to(camera.position, { x: 0, y: 0, z: 35, duration: 2, ease: "power3.inOut" });
             gsap.to(controls.target, { x: 0, y: 0, z: 0, duration: 2, ease: "power3.inOut" });
             
             updateSceneState(null); // Quitar hover
