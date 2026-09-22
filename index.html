@@ -27,10 +27,27 @@
         }
         @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
         
+        /* Transition Overlay */
+        #transition-overlay {
+            position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 45;
+            background-color: rgba(255, 255, 255, 0.85); backdrop-filter: blur(8px);
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.8s ease;
+        }
+        .transition-title { font-size: 2.5rem; color: #333; margin-bottom: 40px; text-align: center; }
+        .transition-table { display: flex; gap: 40px; max-width: 1000px; width: 90%; margin-bottom: 40px; }
+        .transition-col { flex: 1; background: #fff; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .transition-col ul { list-style: none; padding: 0; margin: 0; }
+        .transition-col li { margin-bottom: 20px; font-size: 1.1rem; line-height: 1.5; color: #555; }
+        .transition-col li strong { display: block; color: #222; margin-bottom: 5px; font-size: 1.2rem; }
+        .col-title { font-size: 1.5rem; border-bottom: 2px solid #eee; padding-bottom: 15px; margin-top: 0; }
+        .transition-pitch { font-size: 1.4rem; font-style: italic; color: #006cb5; max-width: 800px; text-align: center; margin-bottom: 40px; font-weight: 500; }
+        #btn-start-3d { font-size: 1.2rem; padding: 15px 40px; width: auto; }
+        
         /* UI Top Left */
         #ui-panel {
             position: absolute; top: 30px; left: 30px; z-index: 10;
-            background: rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.85);
             border-left: 4px solid #006cb5;
             padding: 20px;
             border-radius: 0 10px 10px 0;
@@ -77,10 +94,8 @@
         .btn:hover { background: #ff3355; transform: scale(1.05); }
 
         .node-label {
-            position: absolute; z-index: 5;
-            background: rgba(255,255,255,0.9);
-            border: 1px solid rgba(0,0,0,0.1);
-            padding: 8px 12px; border-radius: 8px;
+            position: absolute; background: rgba(255,255,255,0.9); border: 2px solid #ccc;
+            padding: 8px 12px; border-radius: 8px; z-index: 46;
             font-family: sans-serif; font-size: 12px; font-weight: bold;
             color: #333; pointer-events: none;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
@@ -94,10 +109,16 @@
             z-index: 30; pointer-events: none; display: none; opacity: 0;
         }
         .tour-panel {
-            position: absolute; background: rgba(15, 23, 42, 0.85); /* Dark Glassmorphism */
-            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255,255,255,0.1); border-radius: 12px;
-            padding: 20px 25px; color: #f8fafc; box-shadow: 0 15px 30px -10px rgba(0,0,0,0.5);
+            position: absolute;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(0,0,0,0.1);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            padding: 25px;
+            border-radius: 12px;
+            color: #333333;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            z-index: 20;
         }
         .tour-panel h2 { color: #38bdf8; margin: 0 0 10px 0; font-size: 1.6rem; }
         .tour-panel h3 { color: #38bdf8; margin: 0 0 8px 0; font-size: 1.2rem; }
@@ -159,6 +180,20 @@
         <div class="click-to-start">Haz clic para descubrir la nueva arquitectura</div>
     </div>
 
+    <!-- Pantalla de Transición -->
+    <div id="transition-overlay" style="background-color: transparent; backdrop-filter: none; justify-content: space-between; padding: 60px 20px; box-sizing: border-box;">
+        <div style="display: flex; flex-direction: column; align-items: center; background: rgba(255, 255, 255, 0.9); padding: 25px 50px; border-radius: 20px; box-shadow: 0 15px 40px rgba(0,0,0,0.15);">
+            <h1 class="transition-title" style="color: #006cb5; font-size: 2.8rem; border: none; margin: 0 0 10px 0; background: transparent; box-shadow: none; padding: 0;">
+                Arquitectura Monolítica Anterior
+            </h1>
+            <div class="transition-pitch" style="background: transparent; border: none; padding: 0; font-size: 1.3rem; color: #333333; margin: 0; text-align: center; box-shadow: none;">
+                Alta dependencia, fuertemente acoplado y frágil.<br>Todos los módulos empaquetados y comprimidos en un solo bloque.
+            </div>
+        </div>
+        
+        <button id="btn-start-3d" class="btn" style="font-size: 1.5rem; padding: 20px 50px; border-radius: 50px; background: #006cb5; margin-bottom: 50px;">🔨 MODERNIZAR</button>
+    </div>
+
     <!-- Barra de Tecnologías -->
     <div id="tech-bar">
         <button class="tech-btn" data-target="auth" data-color1="#3178C6" data-color2="#235a97" data-icon="assets/ts.jpg">NestJS</button>
@@ -180,7 +215,7 @@
     </div>
 
     <div id="ui-panel" style="opacity: 0;">
-        <h1>StackX Architecture</h1>
+        <h1>Stack Architecture</h1>
         <p>Demostración interactiva del enrutamiento de microservicios. Pasa el cursor sobre un nodo o tubería para revelar su stack tecnológico.</p>
         <button id="traffic-btn" class="btn">Simular Pico de Tráfico (Catálogo)</button>
     </div>
@@ -239,10 +274,127 @@
         dirLight.position.set(10, 20, 10);
         scene.add(dirLight);
 
+        // --- 1.5 ARQUITECTURA MONOLÍTICA LEGACY ---
+        const legacyGroup = new THREE.Group();
+        scene.add(legacyGroup);
+
+        // Nodo Monolítico
+        const legacyAppGeo = new THREE.BoxGeometry(2.8, 2.8, 2.8);
+        const legacyAppMat = new THREE.MeshStandardMaterial({ 
+            color: 0x3a405a, emissive: 0x3a405a, emissiveIntensity: 0.2,
+            roughness: 0.3, metalness: 0.8, transparent: true 
+        });
+        const legacyAppMesh = new THREE.Mesh(legacyAppGeo, legacyAppMat);
+        
+        // Bordes Rojos para el Monolito
+        const edges = new THREE.EdgesGeometry(legacyAppGeo);
+        const lineEdges = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0xe31837, linewidth: 2, transparent: true }));
+        legacyAppMesh.add(lineEdges);
+
+        legacyGroup.add(legacyAppMesh);
+
+        // Etiquetas Internas del Monolito
+        const legacyInternalLabel = document.createElement('div');
+        legacyInternalLabel.className = 'node-label';
+        legacyInternalLabel.innerHTML = `
+            <div style="font-weight: bold; border-bottom: 1px solid #ccc; padding-bottom: 5px; margin-bottom: 5px; color: #006cb5;">Módulos Acoplados:</div>
+            <div style="margin-bottom: 3px;">🔒 Autenticación y Usuarios</div>
+            <div style="margin-bottom: 3px;">🚌 Gestión de Viajes y Rutas</div>
+            <div style="margin-bottom: 3px;">💳 Pasarela de Pagos</div>
+            <div>🔔 Notificaciones</div>
+        `;
+        legacyInternalLabel.style.background = 'rgba(255, 255, 255, 0.9)';
+        legacyInternalLabel.style.border = '2px solid #ccc';
+        legacyInternalLabel.style.color = '#333333';
+        legacyInternalLabel.style.boxShadow = '0 10px 30px rgba(0,0,0,0.1)';
+        legacyInternalLabel.style.display = 'none';
+        legacyInternalLabel.style.opacity = '1';
+        document.body.appendChild(legacyInternalLabel);
+
+        // Etiqueta Monolito
+        const legacyAppLabel = document.createElement('div');
+        legacyAppLabel.className = 'node-label';
+        legacyAppLabel.innerText = 'MONOLITO BACKEND (TODO EN UNO)';
+        legacyAppLabel.style.color = '#e31837';
+        legacyAppLabel.style.fontWeight = 'bold';
+        legacyAppLabel.style.fontSize = '1.2rem';
+        legacyAppLabel.style.textShadow = '0 2px 4px rgba(0,0,0,0.2)';
+        legacyAppLabel.style.display = 'none';
+        legacyAppLabel.style.opacity = '1';
+        document.body.appendChild(legacyAppLabel); // Append directly to body to avoid opacity issues
+
+        // Base de Datos Monolítica
+        const legacyDbGeo = new THREE.CylinderGeometry(1.5, 1.5, 3, 32);
+        const legacyDbMat = new THREE.MeshStandardMaterial({ 
+            color: 0x006cb5, roughness: 0.2, metalness: 0.8, transparent: true 
+        });
+        const legacyDbMesh = new THREE.Mesh(legacyDbGeo, legacyDbMat);
+        
+        // Wireframe para simular discos de servidor
+        const dbEdges = new THREE.EdgesGeometry(legacyDbGeo);
+        const dbLineEdges = new THREE.LineSegments(dbEdges, new THREE.LineBasicMaterial({ color: 0x5cb5e5, linewidth: 1, transparent: true }));
+        legacyDbMesh.add(dbLineEdges);
+
+        legacyDbMesh.position.set(0, -6, 0);
+        legacyGroup.add(legacyDbMesh);
+
+        // Etiqueta DB Monolito
+        const legacyDbLabel = document.createElement('div');
+        legacyDbLabel.className = 'node-label';
+        legacyDbLabel.innerHTML = 'Base de Datos DB2<br><span style="font-size:0.8rem;color:#e31837">(Punto Único de Fallo / Cuello de Botella)</span>';
+        legacyDbLabel.style.color = '#006cb5';
+        legacyDbLabel.style.fontWeight = 'bold';
+        legacyDbLabel.style.background = 'rgba(255,255,255,0.9)';
+        legacyDbLabel.style.border = '2px solid #ccc';
+        legacyDbLabel.style.padding = '8px 12px';
+        legacyDbLabel.style.borderRadius = '8px';
+        legacyDbLabel.style.boxShadow = '0 10px 30px rgba(0,0,0,0.1)';
+        legacyDbLabel.style.display = 'none';
+        legacyDbLabel.style.opacity = '1';
+        document.body.appendChild(legacyDbLabel);
+
+        // Etiqueta Línea App -> Monolito
+        const legacyLineLabelApp = document.createElement('div');
+        legacyLineLabelApp.className = 'node-label';
+        legacyLineLabelApp.innerHTML = 'Peticiones HTTP acopladas ➔';
+        legacyLineLabelApp.style.background = 'transparent';
+        legacyLineLabelApp.style.border = 'none';
+        legacyLineLabelApp.style.color = '#00a8ff';
+        legacyLineLabelApp.style.boxShadow = 'none';
+        legacyLineLabelApp.style.display = 'none';
+        legacyLineLabelApp.style.opacity = '1';
+        document.body.appendChild(legacyLineLabelApp);
+
+        // Etiqueta Línea Monolito -> DB
+        const legacyLineLabelDb = document.createElement('div');
+        legacyLineLabelDb.className = 'node-label';
+        legacyLineLabelDb.innerHTML = 'Bloqueos de tablas / Consultas pesadas ➔';
+        legacyLineLabelDb.style.background = 'transparent';
+        legacyLineLabelDb.style.border = 'none';
+        legacyLineLabelDb.style.color = '#e31837';
+        legacyLineLabelDb.style.boxShadow = 'none';
+        legacyLineLabelDb.style.display = 'none';
+        legacyLineLabelDb.style.opacity = '1';
+        document.body.appendChild(legacyLineLabelDb);
+
+        // Línea App -> DB
+        const legacyPoints = [new THREE.Vector3(0,-1.4,0), new THREE.Vector3(0,-4.5,0)];
+        const legacyLineGeo = new THREE.BufferGeometry().setFromPoints(legacyPoints);
+        const legacyLineMat = new THREE.LineBasicMaterial({ color: 0x00a8ff, linewidth: 2, transparent: true });
+        const legacyLine = new THREE.Line(legacyLineGeo, legacyLineMat);
+        legacyGroup.add(legacyLine);
+
+        // Línea Origin -> Monolito
+        const originLegacyPoints = [new THREE.Vector3(-12,0,0), new THREE.Vector3(-1.4,0,0)];
+        const originLegacyLineGeo = new THREE.BufferGeometry().setFromPoints(originLegacyPoints);
+        const originLegacyLineMat = new THREE.LineBasicMaterial({ color: 0x00a8ff, linewidth: 2, transparent: true });
+        const originLegacyLine = new THREE.Line(originLegacyLineGeo, originLegacyLineMat);
+        legacyGroup.add(originLegacyLine);
+
         // --- 2. DATOS DE LOS ECOSISTEMAS (STACKX) ---
         const ecosystems = {
             'origin': { 
-                name: 'App Móvil ODM', brand: '#006cb5', pos: [-12, 0, 0], 
+                name: 'Cliente / App Móvil ODM<br><span style="font-size:0.8rem;color:#d1d5db">(Front-End Flutter)</span>', brand: '#5cb5e5', pos: [-12, 0, 0], 
                 orbitals: [
                     { shape: 'diamond', text: 'App Nativa (iOS/Android)' }, 
                     { shape: 'sphere', text: 'UI / UX' }
@@ -356,9 +508,25 @@
             // Etiqueta Principal (HTML)
             const mainLabel = document.createElement('div');
             mainLabel.className = 'node-label';
-            mainLabel.innerText = data.name;
+            mainLabel.innerHTML = data.name;
             mainLabel.style.color = data.brand;
             labelsContainer.appendChild(mainLabel);
+
+            // Health Badge (HTML)
+            const healthBadge = document.createElement('div');
+            healthBadge.className = 'health-badge';
+            healthBadge.innerHTML = '🟢 99.9%';
+            healthBadge.style.position = 'absolute';
+            healthBadge.style.background = 'rgba(0,0,0,0.7)';
+            healthBadge.style.color = '#00ff00';
+            healthBadge.style.padding = '4px 8px';
+            healthBadge.style.borderRadius = '12px';
+            healthBadge.style.fontSize = '10px';
+            healthBadge.style.fontWeight = 'bold';
+            healthBadge.style.pointerEvents = 'none';
+            healthBadge.style.opacity = '0'; // Hidden by default, faded in startTour
+            healthBadge.style.transition = 'opacity 0.5s';
+            labelsContainer.appendChild(healthBadge);
 
             // Anillo Orbital (Oculto por defecto)
             const orbitalGroup = new THREE.Group();
@@ -386,23 +554,36 @@
                 orbMesh.position.set(Math.cos(angle) * radius, Math.sin(angle) * radius, 0);
                 orbitalGroup.add(orbMesh);
 
-                // Etiqueta Técnica HTML
-                const techLabel = document.createElement('div');
-                techLabel.className = 'orbital-label';
-                techLabel.innerText = orbData.text;
-                techLabel.style.borderLeftColor = data.brand;
-                labelsContainer.appendChild(techLabel);
+                // Etiqueta Orbital
+                const label = document.createElement('div');
+                label.className = 'node-label orbital-label';
+                label.innerText = orbData.text;
+                labelsContainer.appendChild(label);
 
-                orbitalDataList.push({ mesh: orbMesh, label: techLabel, angle: angle, radius: radius });
+                orbitalDataList.push({ mesh: orbMesh, label: label, data: orbData });
             });
 
-            nodesMap[id] = { 
-                id, group, coreMesh, lineMat, orbitalGroup, orbitalDataList, mainLabel, data 
+            const ecosystemData = { 
+                id, group, coreMesh, lineMat, orbitalGroup, orbitalDataList, mainLabel, healthBadge, data 
             };
+            nodesMap[id] = ecosystemData;
+            return ecosystemData;
         }
 
         // Crear todos los ecosistemas
-        Object.entries(ecosystems).forEach(([id, data]) => createEcosystem(id, data));
+        Object.entries(ecosystems).forEach(([id, data]) => {
+            const eco = createEcosystem(id, data);
+            eco.targetPos = new THREE.Vector3(...data.pos);
+            
+            if(id === 'origin') {
+                // App móvil es visible desde el principio
+                eco.group.scale.set(1, 1, 1);
+            } else {
+                // Los microservicios inician escondidos en el centro
+                eco.group.position.set(0, 0, 0);
+                eco.group.scale.set(0.01, 0.01, 0.01);
+            }
+        });
 
         // --- 3.5 CREACIÓN DE BASES DE DATOS STANDALONE ---
         const databases = [
@@ -453,8 +634,9 @@
         const particleGeo = new THREE.SphereGeometry(0.12, 8, 8);
 
         function createDataPath(destId) {
-            const start = nodesMap['origin'].group.position;
-            const end = nodesMap[destId].group.position;
+            // Leer targetPos (posición final) en lugar de position (0,0,0)
+            const start = nodesMap['origin'].targetPos;
+            const end = nodesMap[destId].targetPos;
             
             const midPoint = new THREE.Vector3().addVectors(start, end).multiplyScalar(0.5);
             midPoint.y += (Math.random() - 0.5) * 8; 
@@ -472,7 +654,7 @@
             tube.userData = { isTube: true, id: destId };
 
             // Partículas (InstancedMesh) - Inician neutras
-            const pMat = new THREE.MeshBasicMaterial({ color: NEUTRAL_COLOR, transparent: true, opacity: 0.6 });
+            const pMat = new THREE.MeshBasicMaterial({ color: NEUTRAL_COLOR, transparent: true, opacity: 0 }); // Ocultas inicialmente
             const instancedMesh = new THREE.InstancedMesh(particleGeo, pMat, MAX_PARTICLES);
             instancedMesh.count = 40; // Default count
             
@@ -492,40 +674,89 @@
 
         // --- 5. ANIMACIÓN DE ENTRADA (INTRODUCCIÓN) ---
         let sceneActive = false;
+        
+        // Clic en Intro: Muestra pantalla de transición
         document.getElementById('intro-overlay').addEventListener('click', () => {
-            if(sceneActive) return;
-            sceneActive = true;
-            
-            // Fade out intro
             gsap.to('#intro-overlay', { 
                 opacity: 0, duration: 0.8, 
                 onComplete: () => document.getElementById('intro-overlay').style.display = 'none' 
             });
             
-            // No mostrar UI normal aún, empezar tour
-            gsap.to('#labels-container', { opacity: 1, duration: 1, delay: 1 });
+            const transOverlay = document.getElementById('transition-overlay');
+            transOverlay.style.pointerEvents = 'auto';
+            gsap.to(transOverlay, { opacity: 1, duration: 0.8, delay: 0.5 });
+        });
 
-            // Animar cámara desde lejos
-            camera.position.set(0, 0, 90);
+        // Clic en "Ver Arquitectura 3D": Rompe el monolito
+        document.getElementById('btn-start-3d').addEventListener('click', () => {
+            if(sceneActive) return;
+            sceneActive = true;
+            
+            // Fade out transition
+            gsap.to('#transition-overlay', { 
+                opacity: 0, duration: 0.8, 
+                onComplete: () => document.getElementById('transition-overlay').style.display = 'none' 
+            });
+            
+            // No mostrar UI normal aún
+            gsap.to('#labels-container', { opacity: 1, duration: 1, delay: 2.5 });
+
+            // Animar cámara ligeramente hacia atrás para ver la explosión
             gsap.to(camera.position, { 
-                z: 35, duration: 2.5, ease: "power3.out",
-                onComplete: startTour
+                z: 45, duration: 2, ease: "power2.out",
+                onComplete: () => {
+                    gsap.to(camera.position, { z: 35, duration: 2, ease: "power2.inOut", onComplete: startTour });
+                }
             });
 
-            // Pop-in Nodos
-            let delay = 0.5;
+            // 1. Fade out the HTML labels first
+            gsap.to([legacyAppLabel, legacyDbLabel, legacyInternalLabel, legacyLineLabelApp, legacyLineLabelDb], { 
+                opacity: 0, 
+                duration: 0.5, 
+                onComplete: () => {
+                    legacyAppLabel.style.display = 'none';
+                    legacyDbLabel.style.display = 'none';
+                    legacyInternalLabel.style.display = 'none';
+                    legacyLineLabelApp.style.display = 'none';
+                    legacyLineLabelDb.style.display = 'none';
+                }
+            });
+
+            // 2. Destrucción de la Arquitectura Legacy (El Monolito estalla)
+            // Hacemos que se infle rápidamente como si fuera a explotar
+            gsap.to(legacyAppMesh.scale, { x: 2, y: 2, z: 2, duration: 0.4, delay: 0.5, ease: "power2.in" });
+            gsap.to(legacyAppMesh.rotation, { y: "+=1.5", duration: 0.4, delay: 0.5, ease: "power2.in" });
+            
+            // Desvanecer el legacy group justo en el punto de máxima expansión
+            legacyGroup.children.forEach(child => {
+                if(child.material) {
+                    gsap.to(child.material, { opacity: 0, duration: 0.2, delay: 0.8, onComplete: () => {
+                        legacyGroup.visible = false;
+                    }});
+                }
+            });
+
+            // 3. Vuelo de Nodos de Microservicios (Salen disparados del Monolito)
             Object.values(nodesMap).forEach((node) => {
-                gsap.to(node.group.scale, { x: 1, y: 1, z: 1, duration: 1.5, delay: delay, ease: "elastic.out(1, 0.5)" });
-                delay += 0.2;
+                if(node.id !== 'origin') {
+                    // Los microservicios vuelan desde el centro exactamente cuando el monolito estalla (delay 0.85s)
+                    gsap.to(node.group.position, { x: node.targetPos.x, y: node.targetPos.y, z: node.targetPos.z, duration: 2.0, delay: 0.85, ease: "expo.out" });
+                    gsap.to(node.group.scale, { x: 1, y: 1, z: 1, duration: 2.0, delay: 0.85, ease: "elastic.out(1, 0.5)" });
+                }
+                
+                if (node.healthBadge) {
+                    setTimeout(() => node.healthBadge.style.opacity = '1', 3000);
+                }
             });
-
+            
             // Fade in Tubos y Líneas de DB
             Object.values(pathsMap).forEach((path) => {
-                gsap.to(path.tube.material, { opacity: DIM_OPACITY, duration: 2, delay: 1.5 });
+                gsap.to(path.tube.material, { opacity: DIM_OPACITY, duration: 2, delay: 2.5 });
+                gsap.to(path.pMat, { opacity: 0.6, duration: 2, delay: 2.5 }); // Aparecen las partículas
             });
             Object.values(dbsMap).forEach(db => {
-                gsap.to(db.mesh.scale, { x: 1, y: 1, z: 1, duration: 1.5, delay: 1.2, ease: "elastic.out(1, 0.5)" });
-                gsap.to(db.line.material, { opacity: DIM_OPACITY, duration: 2, delay: 1.5 });
+                gsap.to(db.mesh.scale, { x: 1, y: 1, z: 1, duration: 1.5, delay: 2.5, ease: "elastic.out(1, 0.5)" });
+                gsap.to(db.line.material, { opacity: DIM_OPACITY, duration: 2, delay: 2.5 });
             });
         });
 
@@ -678,14 +909,57 @@
             document.getElementById('btn-tour-prev').style.display = index === 0 ? 'none' : 'block';
             document.getElementById('btn-tour-next').innerText = index === tourSteps.length - 1 ? 'Finalizar' : 'Siguiente';
 
-            // Animación de Cámara
+            // Animación de Cámara y Órbita Cinemática
             if (!skipCamera) {
+                controls.autoRotate = true;
+                controls.autoRotateSpeed = 1.0;
                 gsap.to(camera.position, { x: step.camPos.x, y: step.camPos.y, z: step.camPos.z, duration: 2.5, ease: "power3.inOut" });
                 gsap.to(controls.target, { x: step.targetPos.x, y: step.targetPos.y, z: step.targetPos.z, duration: 2.5, ease: "power3.inOut" });
             }
 
             // Foco en Nodo
             updateSceneState(step.focusNode || null);
+
+            // Efectos Especiales por Paso
+            
+            // Reset de efectos
+            Object.values(pathsMap).forEach(path => {
+                path.pMat.color.setHex(0x666666);
+                path.defaultSpeed = 0.0015;
+            });
+            if (window.ghostClones) {
+                window.ghostClones.forEach(c => scene.remove(c));
+                window.ghostClones = null;
+            }
+
+            // Paso 2 (Tolerancia a fallos - Payments) -> Partículas doradas
+            if (index === 1) {
+                const path = pathsMap['orders'];
+                path.pMat.color.setHex(0xffd700); // Dorado
+                path.defaultSpeed = 0.004;
+                path.instances.forEach(inst => inst.speed = path.defaultSpeed + Math.random()*0.002);
+            }
+
+            // Paso 3 (Escalado - Catalog/Journey) -> Clonación de cubos
+            if (index === 2) {
+                const catalogNode = nodesMap['catalog'].coreMesh;
+                window.ghostClones = [];
+                for(let i=-1; i<=1; i+=2) {
+                    const clone = catalogNode.clone();
+                    clone.material = catalogNode.material.clone();
+                    if(Array.isArray(clone.material)) {
+                        clone.material.forEach(m => { m.transparent = true; m.opacity = 0; });
+                    } else {
+                        clone.material.transparent = true;
+                        clone.material.opacity = 0;
+                    }
+                    clone.position.x += i * 3;
+                    scene.add(clone);
+                    window.ghostClones.push(clone);
+                    
+                    gsap.to(clone.material, { opacity: 0.6, duration: 1.5, delay: 0.5 });
+                }
+            }
 
             // Paneles
             hideAllTourPanels();
@@ -711,6 +985,7 @@
             }});
             
             // Regresar cámara al centro panorámico
+            controls.autoRotate = false;
             gsap.to(camera.position, { x: 0, y: 0, z: 35, duration: 2, ease: "power3.inOut" });
             gsap.to(controls.target, { x: 0, y: 0, z: 0, duration: 2, ease: "power3.inOut" });
             
@@ -973,8 +1248,69 @@
             controls.update();
             const time = clock.getElapsedTime();
 
-            // Rotación Base Nodes
+            if (legacyGroup && legacyGroup.visible) {
+                legacyAppMesh.rotation.y += 0.003;
+                legacyAppMesh.rotation.x = Math.sin(time * 0.5) * 0.1;
+                
+                // Actualizar labels de legacy
+                const lPos = new THREE.Vector3();
+                legacyAppMesh.getWorldPosition(lPos);
+                lPos.y += 2.5;
+                lPos.project(camera);
+                legacyAppLabel.style.left = `${(lPos.x*.5+.5)*window.innerWidth}px`;
+                legacyAppLabel.style.top = `${(lPos.y*-.5+.5)*window.innerHeight}px`;
+                legacyAppLabel.style.display = lPos.z > 1 ? 'none' : 'block';
+
+                const dbPos = new THREE.Vector3();
+                legacyDbMesh.getWorldPosition(dbPos);
+                dbPos.y -= 2.5; // Mover etiqueta DEBAJO de la base de datos
+                dbPos.project(camera);
+                legacyDbLabel.style.left = `${(dbPos.x*.5+.5)*window.innerWidth}px`;
+                legacyDbLabel.style.top = `${(dbPos.y*-.5+.5)*window.innerHeight}px`;
+                legacyDbLabel.style.display = dbPos.z > 1 ? 'none' : 'block';
+
+                const intPos = new THREE.Vector3();
+                legacyAppMesh.getWorldPosition(intPos);
+                intPos.x += 3.5; // A la derecha del monolito
+                intPos.project(camera);
+                legacyInternalLabel.style.left = `${(intPos.x*.5+.5)*window.innerWidth}px`;
+                legacyInternalLabel.style.top = `${(intPos.y*-.5+.5)*window.innerHeight}px`;
+                legacyInternalLabel.style.display = intPos.z > 1 ? 'none' : 'block';
+
+                const lineAppPos = new THREE.Vector3(-6, 0, 0);
+                lineAppPos.project(camera);
+                legacyLineLabelApp.style.left = `${(lineAppPos.x*.5+.5)*window.innerWidth}px`;
+                legacyLineLabelApp.style.top = `${(lineAppPos.y*-.5+.5)*window.innerHeight - 30}px`; // Más arriba de la línea
+                legacyLineLabelApp.style.display = lineAppPos.z > 1 ? 'none' : 'block';
+
+                const lineDbPos = new THREE.Vector3(1.5, -3.5, 0); // Mover a la derecha de la línea vertical
+                lineDbPos.project(camera);
+                legacyLineLabelDb.style.left = `${(lineDbPos.x*.5+.5)*window.innerWidth}px`;
+                legacyLineLabelDb.style.top = `${(lineDbPos.y*-.5+.5)*window.innerHeight}px`;
+                legacyLineLabelDb.style.display = lineDbPos.z > 1 ? 'none' : 'block';
+            } else if (legacyAppLabel && legacyAppLabel.style.display !== 'none') {
+                legacyAppLabel.style.display = 'none';
+                legacyDbLabel.style.display = 'none';
+                legacyInternalLabel.style.display = 'none';
+                legacyLineLabelApp.style.display = 'none';
+                legacyLineLabelDb.style.display = 'none';
+            }
+
+            // Rotación Base Nodes y Heartbeat Effect
             Object.values(nodesMap).forEach(node => {
+                // Heartbeat (Glow pulsante)
+                if (node.coreMesh && node.coreMesh.material && Array.isArray(node.coreMesh.material)) {
+                    // Solo el material de la caja principal, índice 0 o 2 dependiendo de cómo se mapeó
+                    const pulse = 0.8 + Math.sin(time * 3) * 0.2;
+                    node.coreMesh.material.forEach(mat => {
+                        if (mat.opacity > 0.5) mat.emissiveIntensity = pulse;
+                    });
+                } else if (node.coreMesh && node.coreMesh.material) {
+                    if (node.coreMesh.material.opacity > 0.5) {
+                        node.coreMesh.material.emissiveIntensity = 0.8 + Math.sin(time * 3) * 0.2;
+                    }
+                }
+
                 node.coreMesh.rotation.x = Math.sin(time * 0.5) * 0.2;
                 node.coreMesh.rotation.y += 0.005;
                 
@@ -982,7 +1318,7 @@
                 node.orbitalGroup.rotation.y = time * -0.5;
                 node.orbitalGroup.rotation.z = Math.sin(time * 0.2) * 0.2;
 
-                // Actualizar proyección 2D de Main Label
+                // Actualizar proyección 2D de Main Label y Health Badge
                 const pos = new THREE.Vector3();
                 node.coreMesh.getWorldPosition(pos);
                 pos.y += 2.5;
@@ -992,6 +1328,12 @@
                 node.mainLabel.style.left = `${x}px`;
                 node.mainLabel.style.top = `${y}px`;
                 node.mainLabel.style.display = pos.z > 1 ? 'none' : 'block';
+
+                if (node.healthBadge) {
+                    node.healthBadge.style.left = `${x}px`;
+                    node.healthBadge.style.top = `${y - 30}px`; // Un poco más arriba del mainLabel
+                    node.healthBadge.style.display = pos.z > 1 ? 'none' : 'block';
+                }
 
                 // Actualizar proyección 2D de Orbital Labels
                 node.orbitalDataList.forEach(orb => {
