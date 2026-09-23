@@ -1517,8 +1517,6 @@ bootstrap();`
                     node.coreMesh.material.color.setHex(0xF59E0B);
                     node.coreMesh.material.emissive.setHex(0xF59E0B);
                     
-                    // Alejar cámara
-                    gsap.to(camera.position, { x: 5, y: 5, z: 35, duration: 2, ease: "power2.inOut" });
                     pathsMap['auth'].defaultSpeed = 0.0015;
                 }
             }
@@ -1687,8 +1685,15 @@ bootstrap();`
             if (nestAssets.subGroup) nestAssets.subGroup.visible = false;
             if (nestAssets.shield) nestAssets.shield.visible = false;
             if (nestAssets.pipeToEvents) nestAssets.pipeToEvents.visible = false;
+            
+            // Regresar cámara al centro panorámico si no hay otro tour activo
+            if (!isNestTourActive && !isFastAPITourActive && !isSpringTourActive) {
+                controls.autoRotate = false;
+                gsap.to(camera.position, { x: 0, y: 0, z: 35, duration: 2, ease: "power3.inOut" });
+                gsap.to(controls.target, { x: 0, y: 0, z: 0, duration: 2, ease: "power3.inOut" });
+            }
         }
-
+        
         document.getElementById('btn-nest-next').addEventListener('click', () => {
             if (currentNestStep < 7) {
                 currentNestStep++;
@@ -1893,8 +1898,6 @@ class TripRequest(BaseModel):
                     node.coreMesh.material.color.setHex(0xD97706);
                     node.coreMesh.material.emissive.setHex(0xD97706);
                     
-                    // Alejar cámara
-                    gsap.to(camera.position, { x: 5, y: 5, z: 35, duration: 2, ease: "power2.inOut" });
                     pathsMap['catalog'].defaultSpeed = 0.0015;
                 }
             }
@@ -2025,6 +2028,13 @@ class TripRequest(BaseModel):
             if(fastapiAssets.hologram) fastapiAssets.hologram.visible = false;
             if(fastapiAssets.aiNodes) fastapiAssets.aiNodes.visible = false;
             if(fastapiAssets.asyncPipe) fastapiAssets.asyncPipe.visible = false;
+            
+            // Regresar cámara al centro panorámico si no hay otro tour activo
+            if (!isNestTourActive && !isFastAPITourActive && !isSpringTourActive) {
+                controls.autoRotate = false;
+                gsap.to(camera.position, { x: 0, y: 0, z: 35, duration: 2, ease: "power3.inOut" });
+                gsap.to(controls.target, { x: 0, y: 0, z: 0, duration: 2, ease: "power3.inOut" });
+            }
         }
 
         document.getElementById('btn-fastapi-next').addEventListener('click', () => {
@@ -2242,8 +2252,6 @@ public class ResilienceConfig {
                     node.coreMesh.material.emissive.setHex(0xD97706);
                     if(springAssets.replicaGhost) springAssets.replicaGhost.children[0].material.color.setHex(0xD97706);
                     
-                    // Alejar cámara
-                    gsap.to(camera.position, { x: 5, y: 5, z: 35, duration: 2, ease: "power2.inOut" });
                     pathsMap['orders'].defaultSpeed = 0.0015;
                 }
             }
@@ -2375,6 +2383,13 @@ public class ResilienceConfig {
             if (node) {
                 const dbOrbital = node.orbitalDataList.find(o => o.data.shape === 'cylinder' || o.data.text.toLowerCase().includes('sql'));
                 if (dbOrbital) gsap.killTweensOf(dbOrbital.mesh.material);
+            }
+            
+            // Regresar cámara al centro panorámico si no hay otro tour activo
+            if (!isNestTourActive && !isFastAPITourActive && !isSpringTourActive) {
+                controls.autoRotate = false;
+                gsap.to(camera.position, { x: 0, y: 0, z: 35, duration: 2, ease: "power3.inOut" });
+                gsap.to(controls.target, { x: 0, y: 0, z: 0, duration: 2, ease: "power3.inOut" });
             }
         }
 
