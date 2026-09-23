@@ -204,6 +204,7 @@
             <div class="bus-shadow"></div>
             <h1>ÓMNIBUS DE MÉXICO</h1>
             <h2>STACK ARCHITECTURE</h2>
+            <h2>
             <div class="click-to-start">🚀 Iniciar Tour Arquitectónico</div>
         </div>
     </div>
@@ -408,8 +409,8 @@
         // Nodo Monolítico
         const legacyAppGeo = new THREE.BoxGeometry(2.8, 2.8, 2.8);
         const legacyAppMat = new THREE.MeshStandardMaterial({ 
-            color: 0x3a405a, emissive: 0x3a405a, emissiveIntensity: 0.2,
-            roughness: 0.3, metalness: 0.8, transparent: true 
+            color: 0xffffff, emissive: 0xffffff, emissiveIntensity: 0.05,
+            roughness: 0.0, metalness: 0.1, transparent: true, opacity: 0.25
         });
         const legacyAppMesh = new THREE.Mesh(legacyAppGeo, legacyAppMat);
         
@@ -457,7 +458,8 @@
         // Base de Datos Monolítica
         const legacyDbGeo = new THREE.CylinderGeometry(1.5, 1.5, 3, 32);
         const legacyDbMat = new THREE.MeshStandardMaterial({ 
-            color: 0x006cb5, roughness: 0.2, metalness: 0.8, transparent: true 
+            color: 0xffffff, emissive: 0xffffff, emissiveIntensity: 0.05,
+            roughness: 0.0, metalness: 0.1, transparent: true, opacity: 0.25
         });
         const legacyDbMesh = new THREE.Mesh(legacyDbGeo, legacyDbMat);
         
