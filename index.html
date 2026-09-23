@@ -375,7 +375,8 @@
         <div id="fastapi-step-metric" style="display: none; background: #f0f8ff; border-left: 4px solid #3776AB; padding: 10px; font-weight: bold; color: #0f172a; border-radius: 0 8px 8px 0; margin-bottom: 15px;"></div>
         
         <!-- Live Code Preview -->
-        <div id="fastapi-code-preview" style="background: #1e1e1e; border-radius: 8px; overflow: hidden; margin-bottom: 15px;">
+        <!-- Live Code Preview -->
+        <div id="fastapi-code-preview" style="background: #1e1e1e; border-radius: 8px; overflow: hidden; margin-bottom: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
             <div style="display: flex; background: #2d2d2d; border-bottom: 1px solid #444;">
                 <button class="fastapi-tab active" data-tab="endpoint" style="background: #1e1e1e; color: #d4d4d4; border: none; padding: 6px 12px; font-size: 0.8rem; cursor: pointer;">Async Endpoint</button>
                 <button class="fastapi-tab" data-tab="model" style="background: transparent; color: #888; border: none; padding: 6px 12px; font-size: 0.8rem; cursor: pointer;">Pydantic Model</button>
@@ -385,7 +386,7 @@
 
         <!-- Botones de Prueba -->
         <div id="fastapi-interactive-buttons" style="display: none; gap: 10px; margin-bottom: 15px;">
-            <button id="btn-fastapi-sim" style="flex: 1; background: #3776AB; color: white; border: none; padding: 8px; border-radius: 5px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 6px rgba(55, 118, 171, 0.3);">⚡ Simular 5,000 Búsquedas Simultáneas</button>
+            <button id="btn-fastapi-sim" style="flex: 1; background: linear-gradient(135deg, #0078D4 0%, #00f2fe 100%); color: #ffffff; font-weight: 700; border: none; padding: 10px; border-radius: 6px; cursor: pointer; box-shadow: 0 4px 15px rgba(0, 242, 254, 0.4); text-transform: uppercase; font-size: 0.85rem; transition: transform 0.2s;">⚡ Simular 5,000 Búsquedas Simultáneas</button>
         </div>
 
         <!-- Navegación del Sub-Tour -->
@@ -752,8 +753,27 @@
             if (iconPaths[id]) {
                 const iconGeo = new THREE.PlaneGeometry(1.6, 1.6);
                 const tex = textureLoader.load(iconPaths[id]);
-                const iconMat = new THREE.MeshBasicMaterial({ 
-                    map: tex, transparent: true, opacity: 0.9
+                const iconMat = new THREE.ShaderMaterial({
+                    uniforms: { tDiffuse: { value: tex } },
+                    vertexShader: `
+                        varying vec2 vUv;
+                        void main() {
+                            vUv = uv;
+                            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                        }
+                    `,
+                    fragmentShader: `
+                        uniform sampler2D tDiffuse;
+                        varying vec2 vUv;
+                        void main() {
+                            vec4 texColor = texture2D(tDiffuse, vUv);
+                            float dist = distance(texColor.rgb, vec3(1.0, 1.0, 1.0));
+                            float alpha = smoothstep(0.05, 0.25, dist);
+                            gl_FragColor = vec4(texColor.rgb, alpha * 0.95);
+                        }
+                    `,
+                    transparent: true,
+                    depthWrite: false
                 });
                 
                 // Frente
@@ -2242,9 +2262,9 @@ class TripRequest(BaseModel):
 
         const fastapiTourSteps = [
             {
-                title: "FastAPI: El Motor de Búsqueda y Rutas",
-                subtitle: "Cálculo de itinerarios y disponibilidad en tiempo real.",
-                desc: "Para el núcleo del negocio (la búsqueda de viajes y asientos), seleccionamos FastAPI. Construido sobre Python moderno, nos ofrece el rendimiento cercano a Go o Node.js gracias a su arquitectura asíncrona, manteniendo la flexibilidad de Python.",
+                title: "FastAPI (Python): Núcleo de Alta Velocidad e Inteligencia",
+                subtitle: "Cálculo de itinerarios, disponibilidad y precios dinámicos.",
+                desc: "Seleccionado como el lenguaje CORE por su rendimiento asíncrono (ASGI), time-to-market acelerado y compatibilidad nativa con modelos de Inteligencia Artificial para la optimización de rutas y precios en tiempo real.<br><br><span style='display:inline-block;background:#e0f2fe;color:#0369a1;padding:4px 8px;border-radius:4px;font-size:0.75rem;font-weight:700;margin-right:5px;margin-bottom:5px;'>⚡ 40% Menos Código</span> <span style='display:inline-block;background:#e0f2fe;color:#0369a1;padding:4px 8px;border-radius:4px;font-size:0.75rem;font-weight:700;margin-right:5px;margin-bottom:5px;'>🧠 Ready para IA</span> <span style='display:inline-block;background:#e0f2fe;color:#0369a1;padding:4px 8px;border-radius:4px;font-size:0.75rem;font-weight:700;margin-right:5px;margin-bottom:5px;'>🚀 Auto-Escalado AKS</span>",
                 metric: "",
                 tab: "endpoint",
                 action: () => {
@@ -2252,11 +2272,26 @@ class TripRequest(BaseModel):
                     gsap.to(camera.position, { x: node.targetPos.x, y: node.targetPos.y + 4, z: node.targetPos.z + 15, duration: 2, ease: "power2.inOut" });
                     gsap.to(controls.target, { x: node.targetPos.x, y: node.targetPos.y, z: node.targetPos.z, duration: 2, ease: "power2.inOut" });
                     
-                    node.coreMesh.material.color.setHex(0x059669);
-                    if (fastapiAssets.pulseTween) fastapiAssets.pulseTween.kill();
-                    fastapiAssets.pulseTween = gsap.to(node.coreMesh.material, { emissiveIntensity: 1.5, duration: 0.6, yoyo: true, repeat: -1 });
+                    // Resaltar nodo catalog y atenuar el resto
+                    Object.values(nodesMap).forEach(n => {
+                        if (n === node) {
+                            n.coreMesh.material.color.setHex(0x0078D4);
+                            gsap.to(n.coreMesh.material, { opacity: 1, duration: 0.5 });
+                            if (fastapiAssets.pulseTween) fastapiAssets.pulseTween.kill();
+                            fastapiAssets.pulseTween = gsap.to(n.coreMesh.material, { emissiveIntensity: 2.0, duration: 0.6, yoyo: true, repeat: -1 });
+                        } else {
+                            gsap.to(n.coreMesh.material, { opacity: 0.3, duration: 0.5 });
+                        }
+                    });
                     
-                    pathsMap['catalog'].defaultSpeed = 0.003; // Acelerar un poco
+                    // Acelerar flujo de partículas
+                    pathsMap['catalog'].defaultSpeed = 0.006; // Doble velocidad
+                    pathsMap['catalog'].instances.forEach(inst => inst.speed = 0.006 + Math.random() * 0.002);
+                    
+                    // Animar icono inferior derecho
+                    const mascotContainer = document.getElementById('mascot-container');
+                    gsap.to(mascotContainer, { scale: 1.1, duration: 0.5, yoyo: true, repeat: 3, ease: "power1.inOut" });
+                    
                     if(fastapiAssets.asgiLines) fastapiAssets.asgiLines.visible = false;
                     if(fastapiAssets.scanner) fastapiAssets.scanner.visible = false;
                     if(fastapiAssets.hologram) fastapiAssets.hologram.visible = false;
@@ -2292,7 +2327,7 @@ class TripRequest(BaseModel):
             {
                 title: "3. Auto-documentación Estándar OpenAPI",
                 subtitle: "",
-                desc: "FastAPI genera de forma nativa contratos OpenAPI y esquemas JSON. Esto acelera el desarrollo Front-End/Mobile en un 40%, ya que los equipos pueden probar y consumir endpoints sin esperar documentación manual.",
+                desc: "FastAPI genera de forma nativa contratos OpenAPI y esquemas JSON. Esto acelera el desarrollo Front-End/Mobile en un 60%, ya que los equipos pueden probar y consumir endpoints sin esperar documentación manual.",
                 metric: "📄 Swagger UI / ReDoc: Nativamente Integrado",
                 tab: "endpoint",
                 action: () => {
@@ -2527,11 +2562,63 @@ class TripRequest(BaseModel):
             path.instancedMesh.count = MAX_PARTICLES;
             path.instances.forEach(inst => {
                 inst.active = true;
-                inst.speed = 0.02 + Math.random() * 0.02; // Very fast
+                inst.speed = 0.04 + Math.random() * 0.02; // Doble de velocidad
             });
             const node = nodesMap['catalog'];
             gsap.to(node.coreMesh.scale, { x: 1.5, y: 1.5, z: 1.5, duration: 0.1, yoyo: true, repeat: 3 });
             
+            // 1. Efecto Visual de Onda de Impacto (Shockwave)
+            if (fastapiAssets.shockwave) {
+                node.coreMesh.remove(fastapiAssets.shockwave);
+                if (fastapiAssets.shockwave.material) fastapiAssets.shockwave.material.dispose();
+                if (fastapiAssets.shockwave.geometry) fastapiAssets.shockwave.geometry.dispose();
+            }
+            const ringGeo = new THREE.TorusGeometry(1.5, 0.05, 16, 100);
+            const ringMat = new THREE.MeshBasicMaterial({ color: 0x00f2fe, transparent: true, opacity: 1 });
+            const shockwave = new THREE.Mesh(ringGeo, ringMat);
+            shockwave.rotation.x = Math.PI / 2;
+            node.coreMesh.add(shockwave);
+            fastapiAssets.shockwave = shockwave;
+
+            gsap.to(shockwave.scale, { x: 8, y: 8, z: 8, duration: 1.2, ease: "power2.out" });
+            gsap.to(shockwave.material, { opacity: 0, duration: 1.2, ease: "power2.out", onComplete: () => {
+                node.coreMesh.remove(shockwave);
+            }});
+
+            // 2. HUD Holográfico de Métricas
+            let hud = document.getElementById('fastapi-hud');
+            if (!hud) {
+                hud = document.createElement('div');
+                hud.id = 'fastapi-hud';
+                hud.style.position = 'absolute';
+                hud.style.background = 'rgba(255, 255, 255, 0.9)';
+                hud.style.border = '2px solid #00f2fe';
+                hud.style.borderRadius = '8px';
+                hud.style.padding = '10px 15px';
+                hud.style.color = '#0f172a';
+                hud.style.fontWeight = 'bold';
+                hud.style.fontSize = '0.9rem';
+                hud.style.boxShadow = '0 10px 30px rgba(0, 242, 254, 0.3)';
+                hud.style.transform = 'translate(-50%, -100%)'; // Center horizontally above
+                hud.style.pointerEvents = 'none';
+                hud.style.zIndex = '50';
+                hud.style.textAlign = 'center';
+                hud.style.backdropFilter = 'blur(4px)';
+                document.body.appendChild(hud);
+            }
+            
+            const reqObj = { val: 0 };
+            hud.style.display = 'block';
+            hud.style.opacity = '1';
+            
+            gsap.to(reqObj, { val: 5000, duration: 1.5, ease: "power3.out", onUpdate: () => {
+                hud.innerHTML = `
+                    <div style="font-size: 1.2rem; color: #0078D4; margin-bottom: 5px;">⚡ ${Math.floor(reqObj.val).toLocaleString()} req/s</div>
+                    <div style="font-size: 0.8rem; color: #059669; margin-bottom: 5px;">Latencia Promedio: 12ms</div>
+                    <div style="font-size: 0.75rem; background: #d1fae5; color: #065f46; border-radius: 4px; padding: 2px 5px; display: inline-block;">Uso CPU: 15% (ASGI Active)</div>
+                `;
+            }});
+
             setTimeout(() => {
                 path.instancedMesh.count = 40;
                 path.instances.forEach((inst, idx) => {
@@ -2539,7 +2626,8 @@ class TripRequest(BaseModel):
                     inst.speed = path.defaultSpeed + Math.random()*0.001;
                 });
                 gsap.to(node.coreMesh.scale, { x: 1, y: 1, z: 1, duration: 0.5 });
-            }, 1000);
+                gsap.to(hud, { opacity: 0, duration: 0.5, delay: 1, onComplete: () => { hud.style.display = 'none'; }});
+            }, 3000);
         });
 
         // --- 6.7 SPRING BOOT SUB-TOUR (8 PASOS) ---
@@ -3032,6 +3120,21 @@ public class ResilienceConfig {
                     node.healthBadge.style.left = `${x + 25}px`; // Esquina superior derecha
                     node.healthBadge.style.top = `${y - 12}px`; // Sin sobresalir demasiado
                     node.healthBadge.style.display = pos.z > 1 ? 'none' : 'block';
+                }
+
+                // HUD Holográfico update for FastAPI
+                if (node === nodesMap['catalog']) {
+                    const hud = document.getElementById('fastapi-hud');
+                    if (hud && hud.style.display !== 'none') {
+                        const hudPos = new THREE.Vector3();
+                        node.coreMesh.getWorldPosition(hudPos);
+                        hudPos.y += 4.0; // Arriba del nodo
+                        hudPos.project(camera);
+                        hud.style.left = `${(hudPos.x * .5 + .5) * window.innerWidth}px`;
+                        hud.style.top = `${(hudPos.y * -.5 + .5) * window.innerHeight}px`;
+                        // Ocultar si está detrás de la cámara
+                        if (hudPos.z > 1) hud.style.display = 'none';
+                    }
                 }
 
                 // Actualizar proyección 2D de Orbital Labels
