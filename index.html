@@ -501,14 +501,14 @@
                 ] 
             },
             'auth': { 
-                name: 'auth-app-odm', brand: '#006cb5', pos: [10, 8, -6], 
+                name: 'auth-app-odm', brand: '#006cb5', pos: [8, 12, -6], 
                 orbitals: [
                     { shape: 'shield', text: 'SSO Apple/Google' }, 
                     { shape: 'box', text: 'Perfiles y Pasajeros' }
                 ] 
             },
             'catalog': { 
-                name: 'journey-odm', brand: '#006cb5', pos: [14, 0, 0], 
+                name: 'journey-odm', brand: '#006cb5', pos: [12, 4, -2], 
                 orbitals: [
                     { shape: 'diamond', text: 'Itinerarios y Asientos' }, 
                     { shape: 'sphere', text: 'Promociones' },
@@ -516,14 +516,14 @@
                 ] 
             },
             'orders': { 
-                name: 'payments-odm', brand: '#006cb5', pos: [10, -8, 6], 
+                name: 'payments-odm', brand: '#006cb5', pos: [8, -12, 6], 
                 orbitals: [
                     { shape: 'shield', text: 'Motor Banamex / Unlimit' }, 
                     { shape: 'box', text: 'Intercambios y Reservas' }
                 ] 
             },
             'events': { 
-                name: 'notification-odm', brand: '#006cb5', pos: [2, -10, -8], 
+                name: 'notification-odm', brand: '#006cb5', pos: [12, -4, 2], 
                 orbitals: [
                     { shape: 'diamond', text: 'Generación PDFs' }, 
                     { shape: 'sphere', text: 'Apple / Google Wallet' }
@@ -687,8 +687,10 @@
 
         // --- 3.5 CREACIÓN DE BASES DE DATOS STANDALONE ---
         const databases = [
-            { id: 'pg', name: 'PostgreSQL', brand: '#006cb5', pos: [12, 13, -10], parent: 'auth' },
-            { id: 'db2', name: 'DB2', brand: '#006cb5', pos: [12, -13, 10], parent: 'orders' }
+            { id: 'pg', name: 'PostgreSQL', brand: '#006cb5', pos: [10, 16, -8], parent: 'auth' },
+            { id: 'mongo', name: 'MongoDB', brand: '#006cb5', pos: [16, 6, -3], parent: 'catalog' },
+            { id: 'redis', name: 'Redis', brand: '#006cb5', pos: [16, -6, 3], parent: 'events' },
+            { id: 'db2', name: 'DB2', brand: '#006cb5', pos: [10, -16, 8], parent: 'orders' }
         ];
         
         const dbsMap = {};
@@ -710,11 +712,12 @@
             mesh.add(new THREE.LineSegments(edges, lineMat));
 
             // Línea de Conexión
-            const parentPos = nodesMap[data.parent].group.position;
+            const parentPos = nodesMap[data.parent].targetPos;
             const points = [parentPos, new THREE.Vector3(...data.pos)];
             const lineGeo = new THREE.BufferGeometry().setFromPoints(points);
-            const connMat = new THREE.LineBasicMaterial({ color: 0x666666, transparent: true, opacity: 0 });
+            const connMat = new THREE.LineDashedMaterial({ color: 0x005691, transparent: true, opacity: 0, dashSize: 0.5, gapSize: 0.2, linewidth: 2 });
             const line = new THREE.Line(lineGeo, connMat);
+            line.computeLineDistances();
             scene.add(line);
 
             // Etiqueta
@@ -856,7 +859,7 @@
             });
             Object.values(dbsMap).forEach(db => {
                 gsap.to(db.mesh.scale, { x: 1, y: 1, z: 1, duration: 1.5, delay: 2.5, ease: "elastic.out(1, 0.5)" });
-                gsap.to(db.line.material, { opacity: DIM_OPACITY, duration: 2, delay: 2.5 });
+                gsap.to(db.line.material, { opacity: 0.8, duration: 2, delay: 2.5 });
             });
         });
 
