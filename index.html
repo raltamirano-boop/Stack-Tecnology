@@ -26,7 +26,7 @@
         .click-to-start:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,86,145,0.5); background: #0284c7; }
         
         @keyframes floatBus { 0% { transform: translateY(0px); } 50% { transform: translateY(-12px); } 100% { transform: translateY(0px); } }
-        @keyframes shadowPulse { 0% { transform: scale(1); opacity: 0.35; } 50% { transform: scale(0.7); opacity: 0.15; } 100% { transform: scale(1); opacity: 0.35; } }
+        @keyframes shadowPulse { 0% { transformF: scale(1); opacity: 0.35; } 50% { transform: scale(0.7); opacity: 0.15; } 100% { transform: scale(1); opacity: 0.35; } }
         @keyframes exhaust { 0% { opacity: 1; transform: translate(0,0) scale(1); } 100% { opacity: 0; transform: translate(-80px, -40px) scale(3.5); } }
         @keyframes networkPulse { 0% { opacity: 0; transform: scale(0.8); } 50% { opacity: 0.5; transform: scale(1.1); } 100% { opacity: 0; transform: scale(1.3); } }
         
@@ -436,12 +436,12 @@
 
     <div id="ui-panel" style="opacity: 0;">
         <h1>Stack Architecture</h1>
-        <p>Demostración interactiva del enrutamiento de microservicios. Pasa el cursor sobre un nodo o tubería para revelar su stack tecnológico.</p>
-        <button id="traffic-btn" class="btn">Simular Pico de Tráfico (Catálogo)</button>
+        <p>Demostración interactiva </p>
+        <!-- <button id="traffic-btn" class="btn">Simular Pico de Tráfico (Catálogo)</button> -->
         
         <div style="margin-top: 20px; border-top: 1px solid #e2e8f0; padding-top: 15px; pointer-events: auto;">
             <div id="resilience-accordion-header" style="font-weight: 700; cursor: pointer; color: #0f172a; display: flex; justify-content: space-between; align-items: center; font-size: 0.95rem;">
-                <span>🛡️ Patrones de Resiliencia</span>
+                <span>🛡️ Resilient Architecture</span>
                 <span id="resilience-accordion-icon">▼</span>
             </div>
             <div id="resilience-accordion-content" style="display: none; margin-top: 15px;">
@@ -3636,8 +3636,14 @@ public class ResilienceConfig {
 
         document.querySelectorAll('.res-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
-                const id = e.target.getAttribute('data-pattern');
-                activatePattern(id);
+                if (e.target.classList.contains('active')) {
+                    e.target.classList.remove('active');
+                    document.getElementById('pattern-info-panel').classList.remove('visible');
+                    resetPatterns();
+                } else {
+                    const id = e.target.getAttribute('data-pattern');
+                    activatePattern(id);
+                }
             });
         });
 
