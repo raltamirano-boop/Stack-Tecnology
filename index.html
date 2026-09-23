@@ -732,17 +732,18 @@
             // Health Badge (HTML)
             const healthBadge = document.createElement('div');
             healthBadge.className = 'health-badge';
-            healthBadge.innerHTML = '🟢 99.9%';
+            healthBadge.innerHTML = '<span style="display:inline-block;width:4px;height:4px;background:#10b981;border-radius:50%;margin-right:4px;vertical-align:middle;"></span>99.9%';
             healthBadge.style.position = 'absolute';
-            healthBadge.style.background = 'rgba(0,0,0,0.7)';
-            healthBadge.style.color = '#00ff00';
-            healthBadge.style.padding = '4px 8px';
-            healthBadge.style.borderRadius = '12px';
-            healthBadge.style.fontSize = '10px';
-            healthBadge.style.fontWeight = 'bold';
+            healthBadge.style.background = 'rgba(16, 185, 129, 0.12)';
+            healthBadge.style.border = '1px solid rgba(16, 185, 129, 0.4)';
+            healthBadge.style.color = '#065f46';
+            healthBadge.style.padding = '2px 6px';
+            healthBadge.style.borderRadius = '10px';
+            healthBadge.style.fontSize = '9px'; // 0.6rem
+            healthBadge.style.fontWeight = '600';
             healthBadge.style.pointerEvents = 'none';
             healthBadge.style.opacity = '0'; // Hidden by default, faded in startTour
-            healthBadge.style.transition = 'opacity 0.5s';
+            healthBadge.style.transition = 'opacity 0.2s';
             labelsContainer.appendChild(healthBadge);
 
             // Anillo Orbital (Oculto por defecto)
@@ -1246,7 +1247,7 @@
                     gsap.to(node.group.scale, { x: 1, y: 1, z: 1, duration: 2.0, delay: 0.85, ease: "elastic.out(1, 0.5)" });
                 }
                 if (node.healthBadge) {
-                    setTimeout(() => node.healthBadge.style.opacity = '1', 3000);
+                    setTimeout(() => node.healthBadge.style.opacity = '0.75', 3000);
                 }
             });
             
@@ -1543,9 +1544,13 @@
             if(isNeutral) {
                 gsap.to(originNode.orbitalGroup.scale, { x: 0.01, y: 0.01, z: 0.01, duration: 0.4 });
                 originNode.orbitalDataList.forEach(orb => orb.label.style.opacity = '0');
+                if (originNode.healthBadge) originNode.healthBadge.style.opacity = '0.75';
             } else if (activeId === 'origin') {
                 gsap.to(originNode.orbitalGroup.scale, { x: 1, y: 1, z: 1, duration: 0.6, ease: "back.out(1.5)" });
                 originNode.orbitalDataList.forEach(orb => orb.label.style.opacity = '1');
+                if (originNode.healthBadge) originNode.healthBadge.style.opacity = '1.0';
+            } else {
+                if (originNode.healthBadge) originNode.healthBadge.style.opacity = '0.4';
             }
 
             // Destinos y Rutas
@@ -1576,6 +1581,9 @@
                     node.orbitalDataList.forEach(orb => orb.label.style.opacity = '0');
                 }
                 node.mainLabel.style.opacity = targetOpacity;
+                if (node.healthBadge) {
+                    node.healthBadge.style.opacity = isActive ? '1.0' : (isNeutral ? '0.75' : '0.4');
+                }
 
                 // Color y Opacidad de las Partículas/Tubos
                 gsap.to(path.tube.material, { opacity: tubeOpacity, duration: 0.4 });
@@ -2960,8 +2968,8 @@ public class ResilienceConfig {
                 node.mainLabel.style.display = pos.z > 1 ? 'none' : 'block';
 
                 if (node.healthBadge) {
-                    node.healthBadge.style.left = `${x}px`;
-                    node.healthBadge.style.top = `${y - 30}px`; // Un poco más arriba del mainLabel
+                    node.healthBadge.style.left = `${x + 25}px`; // Esquina superior derecha
+                    node.healthBadge.style.top = `${y - 12}px`; // Sin sobresalir demasiado
                     node.healthBadge.style.display = pos.z > 1 ? 'none' : 'block';
                 }
 
