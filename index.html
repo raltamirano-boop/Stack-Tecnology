@@ -196,7 +196,7 @@
 
     <!-- Barra de Tecnologías -->
     <div id="tech-bar">
-        <button class="tech-btn" data-target="auth" data-color1="#3178C6" data-color2="#235a97" data-icon="assets/ts.jpg">NestJS</button>
+        <button class="tech-btn" data-target="auth" data-color1="#E0234E" data-color2="#9f1239" data-icon="assets/ts.jpg">NestJS</button>
         <button class="tech-btn" data-target="catalog" data-color1="#3776AB" data-color2="#FFD43B" data-icon="assets/py.jpg">FastAPI</button>
         <button class="tech-btn" data-target="orders" data-color1="#ED8B00" data-color2="#007396" data-icon="assets/java.jpg">Spring Boot</button>
     </div>
@@ -244,15 +244,15 @@
 
     <!-- Panel Interactivo de FastAPI (Sub-Tour) -->
     <div id="fastapi-subtour-panel" class="tour-panel left-panel" style="display: none; top: 50%; transform: translateY(-50%) translateX(-20px); width: 450px; padding: 20px; z-index: 100; pointer-events: auto;">
-        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #059669; padding-bottom: 10px; margin-bottom: 15px;">
-            <h3 id="fastapi-step-title" style="color: #059669; margin: 0; font-size: 1.4rem;">FastAPI: Rutas en Tiempo Real</h3>
-            <span id="fastapi-step-indicator" style="background: #059669; color: white; padding: 4px 10px; border-radius: 15px; font-size: 0.8rem; font-weight: bold;">Paso 1 de 8</span>
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #3776AB; padding-bottom: 10px; margin-bottom: 15px;">
+            <h3 id="fastapi-step-title" style="color: #3776AB; margin: 0; font-size: 1.4rem;">FastAPI: Rutas en Tiempo Real</h3>
+            <span id="fastapi-step-indicator" style="background: #3776AB; color: white; padding: 4px 10px; border-radius: 15px; font-size: 0.8rem; font-weight: bold;">Paso 1 de 8</span>
         </div>
         
         <p id="fastapi-step-subtitle" style="font-style: italic; color: #64748b; margin-bottom: 10px;"></p>
         <p id="fastapi-step-desc" style="font-size: 0.95rem; line-height: 1.5; color: #333; margin-bottom: 15px;"></p>
         
-        <div id="fastapi-step-metric" style="display: none; background: #f0fdf4; border-left: 4px solid #10b981; padding: 10px; font-weight: bold; color: #0f172a; border-radius: 0 8px 8px 0; margin-bottom: 15px;"></div>
+        <div id="fastapi-step-metric" style="display: none; background: #f0f8ff; border-left: 4px solid #3776AB; padding: 10px; font-weight: bold; color: #0f172a; border-radius: 0 8px 8px 0; margin-bottom: 15px;"></div>
         
         <!-- Live Code Preview -->
         <div id="fastapi-code-preview" style="background: #1e1e1e; border-radius: 8px; overflow: hidden; margin-bottom: 15px;">
@@ -265,28 +265,28 @@
 
         <!-- Botones de Prueba -->
         <div id="fastapi-interactive-buttons" style="display: none; gap: 10px; margin-bottom: 15px;">
-            <button id="btn-fastapi-sim" style="flex: 1; background: #059669; color: white; border: none; padding: 8px; border-radius: 5px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 6px rgba(5, 150, 105, 0.3);">⚡ Simular 5,000 Búsquedas Simultáneas</button>
+            <button id="btn-fastapi-sim" style="flex: 1; background: #3776AB; color: white; border: none; padding: 8px; border-radius: 5px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 6px rgba(55, 118, 171, 0.3);">⚡ Simular 5,000 Búsquedas Simultáneas</button>
         </div>
 
         <!-- Navegación del Sub-Tour -->
         <div style="display: flex; justify-content: space-between; margin-top: 10px;">
             <button id="btn-fastapi-prev" style="background: transparent; border: 1px solid #cbd5e1; color: #475569; padding: 6px 15px; border-radius: 20px; cursor: pointer;">◄ Anterior</button>
-            <button id="btn-fastapi-next" style="background: #059669; border: none; color: white; padding: 6px 15px; border-radius: 20px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(5, 150, 105, 0.3);">Siguiente ►</button>
+            <button id="btn-fastapi-next" style="background: #3776AB; border: none; color: white; padding: 6px 15px; border-radius: 20px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(55, 118, 171, 0.3);">Siguiente ►</button>
         </div>
         <button id="btn-fastapi-close" style="position: absolute; top: -15px; right: -15px; background: white; border: 2px solid #cbd5e1; color: #333; width: 30px; height: 30px; border-radius: 50%; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">X</button>
     </div>
 
     <!-- Panel Interactivo de Spring Boot (Sub-Tour) -->
     <div id="spring-subtour-panel" class="tour-panel left-panel" style="display: none; top: 50%; transform: translateY(-50%) translateX(-20px); width: 450px; padding: 20px; z-index: 100; pointer-events: auto;">
-        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #16A34A; padding-bottom: 10px; margin-bottom: 15px;">
-            <h3 id="spring-step-title" style="color: #16A34A; margin: 0; font-size: 1.4rem;">Spring Boot: Motor Transaccional</h3>
-            <span id="spring-step-indicator" style="background: #16A34A; color: white; padding: 4px 10px; border-radius: 15px; font-size: 0.8rem; font-weight: bold;">Paso 1 de 8</span>
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ED8B00; padding-bottom: 10px; margin-bottom: 15px;">
+            <h3 id="spring-step-title" style="color: #ED8B00; margin: 0; font-size: 1.4rem;">Spring Boot: Motor Transaccional</h3>
+            <span id="spring-step-indicator" style="background: #ED8B00; color: white; padding: 4px 10px; border-radius: 15px; font-size: 0.8rem; font-weight: bold;">Paso 1 de 8</span>
         </div>
         
         <p id="spring-step-subtitle" style="font-style: italic; color: #64748b; margin-bottom: 10px;"></p>
         <p id="spring-step-desc" style="font-size: 0.95rem; line-height: 1.5; color: #333; margin-bottom: 15px;"></p>
         
-        <div id="spring-step-metric" style="display: none; background: #f0fdf4; border-left: 4px solid #16A34A; padding: 10px; font-weight: bold; color: #0f172a; border-radius: 0 8px 8px 0; margin-bottom: 15px;"></div>
+        <div id="spring-step-metric" style="display: none; background: #fffbeb; border-left: 4px solid #ED8B00; padding: 10px; font-weight: bold; color: #0f172a; border-radius: 0 8px 8px 0; margin-bottom: 15px;"></div>
         
         <!-- Live Code Preview -->
         <div id="spring-code-preview" style="background: #1e1e1e; border-radius: 8px; overflow: hidden; margin-bottom: 15px;">
@@ -299,13 +299,13 @@
 
         <!-- Botones de Prueba -->
         <div id="spring-interactive-buttons" style="display: none; gap: 10px; margin-bottom: 15px;">
-            <button id="btn-spring-sim" style="flex: 1; background: #16A34A; color: white; border: none; padding: 8px; border-radius: 5px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 6px rgba(22, 163, 74, 0.3);">⚡ Simular Transacción de Pago (PCI-DSS)</button>
+            <button id="btn-spring-sim" style="flex: 1; background: #ED8B00; color: white; border: none; padding: 8px; border-radius: 5px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 6px rgba(237, 139, 0, 0.3);">⚡ Simular Transacción de Pago (PCI-DSS)</button>
         </div>
 
         <!-- Navegación del Sub-Tour -->
         <div style="display: flex; justify-content: space-between; margin-top: 10px;">
             <button id="btn-spring-prev" style="background: transparent; border: 1px solid #cbd5e1; color: #475569; padding: 6px 15px; border-radius: 20px; cursor: pointer;">◄ Anterior</button>
-            <button id="btn-spring-next" style="background: #16A34A; border: none; color: white; padding: 6px 15px; border-radius: 20px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(22, 163, 74, 0.3);">Siguiente ►</button>
+            <button id="btn-spring-next" style="background: #ED8B00; border: none; color: white; padding: 6px 15px; border-radius: 20px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(237, 139, 0, 0.3);">Siguiente ►</button>
         </div>
         <button id="btn-spring-close" style="position: absolute; top: -15px; right: -15px; background: white; border: 2px solid #cbd5e1; color: #333; width: 30px; height: 30px; border-radius: 50%; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">X</button>
     </div>
