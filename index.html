@@ -239,6 +239,38 @@
             letter-spacing: 0.01em;
         }
         
+        /* ============================
+           RESILIENCE PATTERNS UI
+           ============================ */
+        .resilience-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .res-btn {
+            background: rgba(241, 245, 249, 0.8); border: 1px solid #cbd5e1; padding: 6px 10px;
+            border-radius: 6px; font-size: 0.8rem; font-weight: 600; color: #334155;
+            cursor: pointer; transition: all 0.2s; font-family: 'Inter', sans-serif;
+            text-align: left; pointer-events: auto;
+        }
+        .res-btn:hover { background: #e0f2fe; border-color: #38bdf8; color: #0369a1; transform: translateY(-2px); }
+        .res-btn.active { background: #0078D4; border-color: #005691; color: white; font-weight: 600; }
+
+        #pattern-info-panel {
+            position: absolute; top: 20px; right: 20px; width: 320px;
+            background: rgba(255,255,255,0.95); backdrop-filter: blur(16px);
+            border: 1px solid #e2e8f0; border-left: 4px solid #0078D4;
+            padding: 20px; border-radius: 12px; z-index: 40;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            opacity: 0; pointer-events: none; transform: translateX(20px);
+            transition: all 0.4s ease;
+        }
+        #pattern-info-panel.visible { opacity: 1; pointer-events: auto; transform: translateX(0); }
+        #pattern-info-panel h3 { margin: 0 0 12px 0; color: #0f172a; font-size: 1.1rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+        #pattern-info-panel p { margin: 0 0 10px 0; font-size: 0.85rem; line-height: 1.5; color: #334155; }
+        #pattern-info-panel strong { color: #005691; }
+        #btn-close-pattern {
+            position: absolute; top: 15px; right: 15px; background: none; border: none;
+            cursor: pointer; font-size: 0.9rem; opacity: 0.6; transition: opacity 0.2s;
+        }
+        #btn-close-pattern:hover { opacity: 1; }
+
         #labels-container { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 5; pointer-events: none; }
     </style>
 
@@ -406,6 +438,25 @@
         <h1>Stack Architecture</h1>
         <p>Demostración interactiva del enrutamiento de microservicios. Pasa el cursor sobre un nodo o tubería para revelar su stack tecnológico.</p>
         <button id="traffic-btn" class="btn">Simular Pico de Tráfico (Catálogo)</button>
+        
+        <div style="margin-top: 20px; border-top: 1px solid #e2e8f0; padding-top: 15px; pointer-events: auto;">
+            <div id="resilience-accordion-header" style="font-weight: 700; cursor: pointer; color: #0f172a; display: flex; justify-content: space-between; align-items: center; font-size: 0.95rem;">
+                <span>🛡️ Patrones de Resiliencia</span>
+                <span id="resilience-accordion-icon">▼</span>
+            </div>
+            <div id="resilience-accordion-content" style="display: none; margin-top: 15px;">
+                <div class="resilience-buttons">
+                    <button class="res-btn" data-pattern="circuit-breaker">1. Circuit Breaker</button>
+                    <button class="res-btn" data-pattern="fallback">2. Fallback</button>
+                    <button class="res-btn" data-pattern="retry">3. Retry</button>
+                    <button class="res-btn" data-pattern="timeout">4. Timeout</button>
+                    <button class="res-btn" data-pattern="bulkhead">5. Bulkhead</button>
+                    <button class="res-btn" data-pattern="health-checks">6. Health Checks</button>
+                    <button class="res-btn" data-pattern="load-balancing">7. Load Balancing</button>
+                    <button class="res-btn" data-pattern="queues">8. Queues</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Contenedor del Tour Guiado -->
@@ -433,6 +484,16 @@
             <div class="tour-divider"></div>
             <button id="btn-tour-next" class="tour-btn">Siguiente ►</button>
         </div>
+    </div>
+
+
+
+    <!-- Panel de Información del Patrón Activo -->
+    <div id="pattern-info-panel">
+        <h3 id="pattern-title">Título</h3>
+        <p class="pattern-action" id="pattern-action"><strong style="font-weight: 700; color: #005691;">Estrategia:</strong> ...</p>
+        <p class="pattern-impact" id="pattern-impact"><strong style="font-weight: 700; color: #005691;">Impacto en ODM:</strong> ...</p>
+        <button id="btn-close-pattern">❌</button>
     </div>
 
     <div id="labels-container" style="opacity: 0;"></div>
@@ -3061,6 +3122,482 @@ public class ResilienceConfig {
             renderer.render(scene, camera);
         }
 
+        // --- 8. PATRONES DE RESILIENCIA (INTERACTIVIDAD 3D) ---
+        const resilienceData = {
+            'circuit-breaker': { title: '🛡️ Circuit Breaker Activado', action: 'Interrumpe automáticamente el tráfico hacia el microservicio afectado (payments-odm) para prevenir fallas en cascada.', impact: 'Evita sobrecargar servicios con latencia o errores, garantizando la estabilidad operativa del resto de los canales.' },
+            'fallback': { title: '🔀 Fallback', action: 'Al cortar la vía principal, las partículas cambian de trayectoria hacia una ruta secundaria (nodo de respuesta en caché o contingencia).', impact: 'Proporciona una alternativa inmediata para que la venta de boletos no se detenga.' },
+            'retry': { title: '🔄 Retry', action: 'Lanza pequeñas ráfagas de partículas de prueba (máximo 3 intentos) con destellos amarillos antes de declarar el servicio caído.', impact: 'Vuelve a intentar automáticamente cuando el error puede ser temporal o por intermitencia de red.' },
+            'timeout': { title: '⏱️ Timeout', action: 'Un temporizador holográfico aparece sobre el nodo; si el servicio no responde en el tiempo límite, la conexión se corta limpiamente.', impact: 'Evita esperar indefinidamente y liberar recursos consumidos por peticiones colgadas.' },
+            'bulkhead': { title: '🧱 Bulkhead', action: 'Un domo o barrera de cristal se enciende alrededor del servicio o contenedor afectado para asilarlo visualmente.', impact: 'Aísla recursos para evitar que una falla en un componente se propague al resto de la plataforma.' },
+            'health-checks': { title: '🟢 Health Checks', action: 'El indicador 99.9% titila y emite un pulso de radar hacia el orquestador de Kubernetes (AKS) para verificar el estado de los pods.', impact: 'Detecta componentes enfermos y notifica al orquestador para reiniciar instancias dañadas.' },
+            'load-balancing': { title: '⚖️ Load Balancing', action: 'El flujo principal de entrada se divide equitativamente entre 3 tuberías hacia múltiples réplicas en Azure AKS.', impact: 'Distribuye la carga de peticiones equitativamente entre instancias para evitar saturación.' },
+            'queues': { title: '📬 Queues / Messaging', action: 'Las partículas se acumulan momentáneamente en un nodo intermedio (Event Hubs / RabbitMQ) antes de ser procesadas por el backend.', impact: 'Desacopla servicios procesando eventos de forma asíncrona sin bloquear la interfaz.' }
+        };
+
+        let currentResilienceTween = null;
+        const resilienceObjects = []; 
+
+        function resetPatterns() {
+            if (currentResilienceTween) {
+                currentResilienceTween.kill();
+                currentResilienceTween = null;
+            }
+            resilienceObjects.forEach(obj => {
+                if (obj.isObject3D) scene.remove(obj);
+                if(obj.geometry) obj.geometry.dispose();
+                if(obj.material) {
+                    if(Array.isArray(obj.material)) obj.material.forEach(m => m.dispose());
+                    else obj.material.dispose();
+                }
+                if(typeof obj.dispose === 'function') obj.dispose();
+            });
+            resilienceObjects.length = 0;
+            
+            Object.values(pathsMap).forEach(path => {
+                path.instances.forEach(inst => { inst.speed = path.defaultSpeed + Math.random()*0.001; });
+                gsap.killTweensOf(path.pMat);
+                gsap.killTweensOf(path.pMat.color);
+                gsap.to(path.pMat, { opacity: 1, duration: 0.5 });
+                gsap.to(path.pMat.color, { r: new THREE.Color(NEUTRAL_COLOR).r, g: new THREE.Color(NEUTRAL_COLOR).g, b: new THREE.Color(NEUTRAL_COLOR).b, duration: 0.5 });
+            });
+            updateSceneState(null);
+        }
+
+        function animCircuitBreaker() { 
+            const node = nodesMap['orders'];
+            const path = pathsMap['orders'];
+
+            // 1. Detener partículas en esta ruta
+            path.instances.forEach(inst => inst.speed = 0);
+            
+            // 2. Apagar opacidad del tubo
+            gsap.to(path.tube.material, { opacity: 0.05, duration: 0.5 });
+            gsap.to(path.pMat, { opacity: 0, duration: 0.5 });
+
+            // 3. Crear Anillo Rojo Parpadeante
+            const ringGeo = new THREE.TorusGeometry(3, 0.2, 16, 100);
+            const ringMat = new THREE.MeshPhysicalMaterial({
+                color: 0xff0000,
+                emissive: 0xff0000,
+                emissiveIntensity: 2.0,
+                transparent: true,
+                opacity: 0.8
+            });
+            const ring = new THREE.Mesh(ringGeo, ringMat);
+            
+            // Posicionar alrededor del nodo
+            ring.position.copy(node.group.position);
+            ring.rotation.x = Math.PI / 2; // Acostado
+            scene.add(ring);
+            resilienceObjects.push(ring);
+
+            // Animar Anillo (Parpadeo y Escala)
+            currentResilienceTween = gsap.to(ringMat, {
+                emissiveIntensity: 0.2,
+                opacity: 0.2,
+                duration: 0.6,
+                yoyo: true,
+                repeat: -1,
+                ease: "power1.inOut"
+            });
+            
+            gsap.to(ring.scale, {
+                x: 1.2, y: 1.2, z: 1.2,
+                duration: 0.6,
+                yoyo: true,
+                repeat: -1
+            });
+            
+            // Cambiar el color del nodo a rojo
+            gsap.to(node.coreMesh.material.color, { r: 1, g: 0, b: 0, duration: 0.5 });
+            gsap.to(node.coreMesh.material, { emissiveIntensity: 2.0, duration: 0.5 });
+        }
+        function animFallback() { 
+            const node = nodesMap['orders'];
+            const path = pathsMap['orders'];
+            
+            // 1. Detener partículas a la ruta principal
+            path.instances.forEach(inst => inst.speed = 0);
+            gsap.to(path.pMat, { opacity: 0, duration: 0.5 });
+            gsap.to(path.tube.material, { opacity: 0.05, duration: 0.5 });
+
+            // 2. Crear Nodo Secundario (Caché / Contingencia)
+            const fallbackGeo = new THREE.BoxGeometry(3, 3, 3);
+            const fallbackMat = new THREE.MeshPhysicalMaterial({ color: 0x10b981, emissive: 0x10b981, emissiveIntensity: 1.0, clearcoat: 1.0 });
+            const fallbackNode = new THREE.Mesh(fallbackGeo, fallbackMat);
+            fallbackNode.position.set(12, 0, 10); // A la derecha de origin
+            scene.add(fallbackNode);
+            resilienceObjects.push(fallbackNode);
+
+            // 3. Crear Ruta Secundaria (Línea verde curva)
+            const fallbackCurve = new THREE.QuadraticBezierCurve3(
+                nodesMap['origin'].group.position,
+                new THREE.Vector3(5, 5, 5),
+                fallbackNode.position
+            );
+            
+            const tubeGeo = new THREE.TubeGeometry(fallbackCurve, 64, 0.2, 8, false);
+            const tubeMat = new THREE.MeshBasicMaterial({ color: 0x10b981, transparent: true, opacity: 0.4 });
+            const tubeMesh = new THREE.Mesh(tubeGeo, tubeMat);
+            scene.add(tubeMesh);
+            resilienceObjects.push(tubeMesh);
+
+            // Partículas viajando a fallback
+            const pCount = 15;
+            const fallbackPGeo = new THREE.SphereGeometry(0.15, 8, 8);
+            const fallbackPMat = new THREE.MeshBasicMaterial({ color: 0x10b981 });
+            const fallbackInstMesh = new THREE.InstancedMesh(fallbackPGeo, fallbackPMat, pCount);
+            
+            scene.add(fallbackInstMesh);
+            resilienceObjects.push(fallbackInstMesh);
+
+            const dummy = new THREE.Object3D();
+            const fallbackInstances = [];
+            for (let i = 0; i < pCount; i++) {
+                fallbackInstances.push({ progress: i / pCount, speed: 0.01 + Math.random()*0.005 });
+            }
+
+            const progressObj = { value: 0 };
+            currentResilienceTween = gsap.to(progressObj, {
+                value: 1, duration: 1, repeat: -1,
+                onUpdate: () => {
+                    for (let i = 0; i < pCount; i++) {
+                        const inst = fallbackInstances[i];
+                        inst.progress += inst.speed;
+                        if (inst.progress > 1) inst.progress = 0;
+                        const point = fallbackCurve.getPointAt(inst.progress);
+                        dummy.position.copy(point);
+                        dummy.updateMatrix();
+                        fallbackInstMesh.setMatrixAt(i, dummy.matrix);
+                    }
+                    fallbackInstMesh.instanceMatrix.needsUpdate = true;
+                    fallbackNode.rotation.y += 0.01;
+                }
+            });
+        }
+
+        function animRetry() { 
+            const node = nodesMap['orders'];
+            const path = pathsMap['orders'];
+            
+            // Pausar flujo normal
+            path.instances.forEach(inst => inst.speed = 0);
+            gsap.to(path.pMat, { opacity: 0, duration: 0.2 });
+
+            // Crear una nueva partícula amarilla (ráfaga)
+            const retryPGeo = new THREE.SphereGeometry(0.5, 16, 16);
+            const retryPMat = new THREE.MeshBasicMaterial({ color: 0xfacc15 });
+            const retryMesh = new THREE.Mesh(retryPGeo, retryPMat);
+            scene.add(retryMesh);
+            resilienceObjects.push(retryMesh);
+
+            const progressObj = { value: 0 };
+            const tl = gsap.timeline({ repeat: -1, repeatDelay: 1 });
+            currentResilienceTween = tl;
+
+            tl.to(progressObj, {
+                value: 1, duration: 1.5, ease: "power2.in",
+                onStart: () => {
+                    retryMesh.visible = true;
+                    progressObj.value = 0;
+                },
+                onUpdate: () => {
+                    const point = path.curve.getPointAt(progressObj.value);
+                    retryMesh.position.copy(point);
+                },
+                onComplete: () => {
+                    retryMesh.visible = false;
+                    // Flash del nodo en amarillo
+                    gsap.fromTo(node.coreMesh.material.color, {r:1,g:0.8,b:0}, {r:new THREE.Color(NEUTRAL_COLOR).r, g:new THREE.Color(NEUTRAL_COLOR).g, b:new THREE.Color(NEUTRAL_COLOR).b, duration: 0.5});
+                }
+            });
+        }
+
+        function animTimeout() { 
+            const node = nodesMap['orders'];
+            const path = pathsMap['orders'];
+            
+            const canvas = document.createElement('canvas');
+            canvas.width = 256; canvas.height = 128;
+            const ctx = canvas.getContext('2d');
+            
+            const tex = new THREE.CanvasTexture(canvas);
+            const mat = new THREE.SpriteMaterial({ map: tex, transparent: true });
+            const sprite = new THREE.Sprite(mat);
+            sprite.scale.set(6, 3, 1);
+            sprite.position.copy(node.group.position);
+            sprite.position.y += 5;
+            scene.add(sprite);
+            resilienceObjects.push(sprite);
+
+            let timeLeft = 3000;
+            currentResilienceTween = gsap.to({}, {
+                duration: 3,
+                onUpdate: function() {
+                    timeLeft -= 16; 
+                    if (timeLeft < 0) timeLeft = 0;
+                    ctx.clearRect(0,0,256,128);
+                    ctx.fillStyle = '#ef4444';
+                    ctx.font = 'bold 60px Inter';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(`${Math.ceil(timeLeft/1000)}s`, 128, 80);
+                    tex.needsUpdate = true;
+                },
+                onComplete: () => {
+                    ctx.clearRect(0,0,256,128);
+                    ctx.fillStyle = '#ef4444';
+                    ctx.fillText(`TIMEOUT`, 128, 80);
+                    tex.needsUpdate = true;
+                    
+                    path.instances.forEach(inst => inst.speed = 0);
+                    gsap.to(path.tube.material, { opacity: 0, duration: 0.1 });
+                    gsap.to(path.pMat, { opacity: 0, duration: 0.1 });
+                    gsap.to(node.coreMesh.material, { opacity: 0.2, duration: 0.1 });
+                }
+            });
+        }
+
+        function animBulkhead() { 
+            const node = nodesMap['orders'];
+            
+            const domeGeo = new THREE.SphereGeometry(6, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2);
+            const domeMat = new THREE.MeshPhysicalMaterial({
+                color: 0x38bdf8,
+                transparent: true,
+                opacity: 0.3,
+                roughness: 0.1,
+                transmission: 0.9,
+                thickness: 0.5,
+                side: THREE.DoubleSide
+            });
+            const dome = new THREE.Mesh(domeGeo, domeMat);
+            dome.position.copy(node.group.position);
+            dome.position.y -= 2;
+            scene.add(dome);
+            resilienceObjects.push(dome);
+
+            dome.scale.set(0.01, 0.01, 0.01);
+            currentResilienceTween = gsap.to(dome.scale, { x: 1, y: 1, z: 1, duration: 1.5, ease: "elastic.out(1, 0.5)" });
+            gsap.to(dome.rotation, { y: Math.PI * 2, duration: 10, repeat: -1, ease: "none" });
+        }
+
+        function animHealthChecks() { 
+            const node = nodesMap['orders'];
+            
+            if (node.healthBadge) {
+                node.healthBadge.style.background = 'rgba(239, 68, 68, 0.2)';
+                node.healthBadge.style.border = '1px solid rgba(239, 68, 68, 0.6)';
+                node.healthBadge.style.color = '#7f1d1d';
+                node.healthBadge.innerHTML = '<span style="display:inline-block;width:4px;height:4px;background:#ef4444;border-radius:50%;margin-right:4px;vertical-align:middle;"></span>ERROR';
+                
+                resilienceObjects.push({
+                    geometry: null, material: null, scene: null,
+                    dispose: () => {
+                        node.healthBadge.style.background = 'rgba(16, 185, 129, 0.12)';
+                        node.healthBadge.style.border = '1px solid rgba(16, 185, 129, 0.4)';
+                        node.healthBadge.style.color = '#065f46';
+                        node.healthBadge.innerHTML = '<span style="display:inline-block;width:4px;height:4px;background:#10b981;border-radius:50%;margin-right:4px;vertical-align:middle;"></span>99.9%';
+                    }
+                });
+            }
+
+            const ringGeo = new THREE.RingGeometry(0.1, 0.5, 32);
+            const ringMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 1, side: THREE.DoubleSide });
+            const ring = new THREE.Mesh(ringGeo, ringMat);
+            ring.rotation.x = -Math.PI / 2;
+            ring.position.copy(nodesMap['origin'].group.position);
+            scene.add(ring);
+            resilienceObjects.push(ring);
+
+            currentResilienceTween = gsap.to(ring.scale, { x: 40, y: 40, duration: 2, repeat: -1, ease: "power2.out" });
+            gsap.to(ringMat, { opacity: 0, duration: 2, repeat: -1, ease: "power2.out" });
+        }
+        function animLoadBalancing() { 
+            const node = nodesMap['orders'];
+            const path = pathsMap['orders'];
+            
+            // Pausar flujo principal
+            path.instances.forEach(inst => inst.speed = 0);
+            gsap.to(path.pMat, { opacity: 0, duration: 0.2 });
+
+            // Crear 3 réplicas del nodo
+            const offsets = [
+                {x: -4, y: 0, z: -2},
+                {x: 0, y: 0, z: 0},
+                {x: 4, y: 0, z: 2}
+            ];
+            
+            const originPos = nodesMap['origin'].group.position;
+            
+            offsets.forEach((offset, i) => {
+                const repNode = node.group.clone();
+                repNode.position.set(node.group.position.x + offset.x, node.group.position.y + offset.y, node.group.position.z + offset.z);
+                scene.add(repNode);
+                resilienceObjects.push(repNode);
+                
+                const repCurve = new THREE.QuadraticBezierCurve3(
+                    originPos,
+                    new THREE.Vector3((originPos.x + repNode.position.x)/2, 5, (originPos.z + repNode.position.z)/2),
+                    repNode.position
+                );
+                
+                const repGeo = new THREE.TubeGeometry(repCurve, 64, 0.1, 8, false);
+                const repMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.3 });
+                const repTube = new THREE.Mesh(repGeo, repMat);
+                scene.add(repTube);
+                resilienceObjects.push(repTube);
+                
+                const repPGeo = new THREE.SphereGeometry(0.15, 8, 8);
+                const repPMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8 });
+                const repMesh = new THREE.InstancedMesh(repPGeo, repPMat, 5);
+                scene.add(repMesh);
+                resilienceObjects.push(repMesh);
+                
+                const dummy = new THREE.Object3D();
+                const instances = [0, 0.2, 0.4, 0.6, 0.8].map(p => ({ progress: p, speed: 0.005 + Math.random()*0.002 }));
+                
+                const tl = gsap.to({}, {
+                    duration: 1, repeat: -1,
+                    onUpdate: () => {
+                        instances.forEach((inst, j) => {
+                            inst.progress += inst.speed;
+                            if (inst.progress > 1) inst.progress = 0;
+                            const point = repCurve.getPointAt(inst.progress);
+                            dummy.position.copy(point);
+                            dummy.updateMatrix();
+                            repMesh.setMatrixAt(j, dummy.matrix);
+                        });
+                        repMesh.instanceMatrix.needsUpdate = true;
+                    }
+                });
+                
+                resilienceObjects.push({ geometry: null, material: null, dispose: () => tl.kill() });
+            });
+            
+            node.group.visible = false;
+            resilienceObjects.push({
+                geometry: null, material: null,
+                dispose: () => { node.group.visible = true; }
+            });
+        }
+
+        function animQueues() { 
+            const node = nodesMap['orders'];
+            const path = pathsMap['orders'];
+            
+            // Pausar principal
+            path.instances.forEach(inst => inst.speed = 0);
+            gsap.to(path.pMat, { opacity: 0, duration: 0.2 });
+
+            // Crear Cola (Caja ancha)
+            const queueGeo = new THREE.BoxGeometry(4, 1.5, 2);
+            const queueMat = new THREE.MeshPhysicalMaterial({ color: 0xa855f7, transparent: true, opacity: 0.5, clearcoat: 1.0 });
+            const queueNode = new THREE.Mesh(queueGeo, queueMat);
+            
+            const originPos = nodesMap['origin'].group.position;
+            const destPos = node.group.position;
+            const midPoint = new THREE.Vector3((originPos.x + destPos.x)/2, 2, (originPos.z + destPos.z)/2);
+            
+            queueNode.position.copy(midPoint);
+            scene.add(queueNode);
+            resilienceObjects.push(queueNode);
+            
+            // Simular partículas llegando a la cola y saliendo
+            const pCount = 20;
+            const qPGeo = new THREE.SphereGeometry(0.2, 8, 8);
+            const qPMat = new THREE.MeshBasicMaterial({ color: 0xa855f7 });
+            const qInstMesh = new THREE.InstancedMesh(qPGeo, qPMat, pCount);
+            scene.add(qInstMesh);
+            resilienceObjects.push(qInstMesh);
+            
+            const curveIn = new THREE.QuadraticBezierCurve3(originPos, new THREE.Vector3(originPos.x, 5, originPos.z), midPoint);
+            const curveOut = new THREE.QuadraticBezierCurve3(midPoint, new THREE.Vector3(destPos.x, 5, destPos.z), destPos);
+            
+            const dummy = new THREE.Object3D();
+            const instances = [];
+            for (let i = 0; i < pCount; i++) {
+                instances.push({ 
+                    progress: Math.random(), 
+                    state: Math.random() > 0.5 ? 'in' : 'out',
+                    speed: 0.005 + Math.random()*0.005
+                });
+            }
+            
+            currentResilienceTween = gsap.to({}, {
+                duration: 1, repeat: -1,
+                onUpdate: () => {
+                    instances.forEach((inst, j) => {
+                        inst.progress += inst.speed;
+                        if (inst.progress >= 1) {
+                            inst.progress = 0;
+                            inst.state = inst.state === 'in' ? 'out' : 'in';
+                        }
+                        
+                        let point;
+                        if (inst.state === 'in') point = curveIn.getPointAt(inst.progress);
+                        else point = curveOut.getPointAt(inst.progress);
+                        
+                        dummy.position.copy(point);
+                        dummy.updateMatrix();
+                        qInstMesh.setMatrixAt(j, dummy.matrix);
+                    });
+                    qInstMesh.instanceMatrix.needsUpdate = true;
+                }
+            });
+        }
+
+        function activatePattern(id) {
+            resetPatterns();
+            const data = resilienceData[id];
+            if (!data) return;
+
+            document.getElementById('pattern-title').innerText = data.title;
+            document.getElementById('pattern-action').innerHTML = `<strong style="font-weight: 700; color: #005691;">Estrategia:</strong> ${data.action}`;
+            document.getElementById('pattern-impact').innerHTML = `<strong style="font-weight: 700; color: #005691;">Impacto en ODM:</strong> ${data.impact}`;
+            document.getElementById('pattern-info-panel').classList.add('visible');
+
+            document.querySelectorAll('.res-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`.res-btn[data-pattern="${id}"]`).classList.add('active');
+
+            switch(id) {
+                case 'circuit-breaker': animCircuitBreaker(); break;
+                case 'fallback': animFallback(); break;
+                case 'retry': animRetry(); break;
+                case 'timeout': animTimeout(); break;
+                case 'bulkhead': animBulkhead(); break;
+                case 'health-checks': animHealthChecks(); break;
+                case 'load-balancing': animLoadBalancing(); break;
+                case 'queues': animQueues(); break;
+            }
+        }
+
+        document.getElementById('btn-close-pattern').addEventListener('click', () => {
+            document.getElementById('pattern-info-panel').classList.remove('visible');
+            document.querySelectorAll('.res-btn').forEach(btn => btn.classList.remove('active'));
+            resetPatterns();
+        });
+
+        document.getElementById('resilience-accordion-header').addEventListener('click', () => {
+            const content = document.getElementById('resilience-accordion-content');
+            const icon = document.getElementById('resilience-accordion-icon');
+            if (content.style.display === 'none') {
+                content.style.display = 'block';
+                icon.innerText = '▲';
+            } else {
+                content.style.display = 'none';
+                icon.innerText = '▼';
+            }
+        });
+
+        document.querySelectorAll('.res-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = e.target.getAttribute('data-pattern');
+                activatePattern(id);
+            });
+        });
+
+        // El menú ahora se muestra al terminar el tour (ver función endTour)
+        
         animate();
 
         window.addEventListener('resize', () => {
