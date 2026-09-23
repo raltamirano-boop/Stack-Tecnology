@@ -3128,7 +3128,7 @@ public class ResilienceConfig {
             'fallback': { title: '🔀 Fallback', action: 'Al cortar la vía principal, las partículas cambian de trayectoria hacia una ruta secundaria (nodo de respuesta en caché o contingencia).', impact: 'Proporciona una alternativa inmediata para que la venta de boletos no se detenga.' },
             'retry': { title: '🔄 Retry', action: 'Lanza pequeñas ráfagas de partículas de prueba (máximo 3 intentos) con destellos amarillos antes de declarar el servicio caído.', impact: 'Vuelve a intentar automáticamente cuando el error puede ser temporal o por intermitencia de red.' },
             'timeout': { title: '⏱️ Timeout', action: 'Un temporizador holográfico aparece sobre el nodo; si el servicio no responde en el tiempo límite, la conexión se corta limpiamente.', impact: 'Evita esperar indefinidamente y liberar recursos consumidos por peticiones colgadas.' },
-            'bulkhead': { title: '🧱 Bulkhead', action: 'Un domo o barrera de cristal se enciende alrededor del servicio o contenedor afectado para asilarlo visualmente.', impact: 'Aísla recursos para evitar que una falla en un componente se propague al resto de la plataforma.' },
+            'bulkhead': { title: '🧱 Bulkhead (Aislamiento de Recursos)', action: 'Asigna un pool limitado e independiente de hilos y memoria a cada microservicio, conteniendo cualquier saturación en un perímetro aislado.', impact: 'Previene que la sobrecarga en servicios secundarios (como facturación o emails) consuma los recursos del core transaccional de venta de boletos.' },
             'health-checks': { title: '🟢 Health Checks', action: 'El indicador 99.9% titila y emite un pulso de radar hacia el orquestador de Kubernetes (AKS) para verificar el estado de los pods.', impact: 'Detecta componentes enfermos y notifica al orquestador para reiniciar instancias dañadas.' },
             'load-balancing': { title: '⚖️ Load Balancing', action: 'El flujo principal de entrada se divide equitativamente entre 3 tuberías hacia múltiples réplicas en Azure AKS.', impact: 'Distribuye la carga de peticiones equitativamente entre instancias para evitar saturación.' },
             'queues': { title: '📬 Queues / Messaging', action: 'Las partículas se acumulan momentáneamente en un nodo intermedio (Event Hubs / RabbitMQ) antes de ser procesadas por el backend.', impact: 'Desacopla servicios procesando eventos de forma asíncrona sin bloquear la interfaz.' }
@@ -3358,11 +3358,27 @@ public class ResilienceConfig {
         }
 
         function animBulkhead() { 
-            const node = nodesMap['orders'];
+            const node = nodesMap['events']; // notification-odm
+            const path = pathsMap['events'];
             
+            // 1. Simular falla interna en notification-odm
+            gsap.to(node.coreMesh.material.color, { r: 1, g: 0.2, b: 0, duration: 0.5 });
+            gsap.to(node.coreMesh.material, { emissiveIntensity: 2.0, duration: 0.5 });
+            gsap.to(node.coreMesh.scale, { x: 1.2, y: 1.2, z: 1.2, duration: 0.2, repeat: -1, yoyo: true });
+
+            resilienceObjects.push({
+                dispose: () => {
+                    gsap.killTweensOf(node.coreMesh.scale);
+                    node.coreMesh.scale.set(1, 1, 1);
+                }
+            });
+
+            // 2. El Domo de contención protector
             const domeGeo = new THREE.SphereGeometry(6, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2);
             const domeMat = new THREE.MeshPhysicalMaterial({
-                color: 0x38bdf8,
+                color: 0x00f2fe,
+                emissive: 0x00f2fe,
+                emissiveIntensity: 0.4,
                 transparent: true,
                 opacity: 0.3,
                 roughness: 0.1,
@@ -3377,8 +3393,37 @@ public class ResilienceConfig {
             resilienceObjects.push(dome);
 
             dome.scale.set(0.01, 0.01, 0.01);
-            currentResilienceTween = gsap.to(dome.scale, { x: 1, y: 1, z: 1, duration: 1.5, ease: "elastic.out(1, 0.5)" });
+            gsap.to(dome.scale, { x: 1, y: 1, z: 1, duration: 1.5, ease: "elastic.out(1, 0.5)" });
             gsap.to(dome.rotation, { y: Math.PI * 2, duration: 10, repeat: -1, ease: "none" });
+
+            // 3. Partículas hacia notification-odm chocan con el domo (se vuelven rojas)
+            if (path) {
+                gsap.to(path.pMat.color, { r: 1, g: 0.2, b: 0, duration: 0.5 });
+                path.instances.forEach(inst => {
+                    inst.speed = 0.01 + Math.random() * 0.005;
+                });
+                
+                const dummyObj = { val: 0 };
+                currentResilienceTween = gsap.to(dummyObj, {
+                    val: 1, duration: 1, repeat: -1, onUpdate: () => {
+                        path.instances.forEach(inst => {
+                            if (inst.progress > 0.85) {
+                                inst.progress = 0; // Chocan y mueren/reaparecen al inicio
+                            }
+                        });
+                    }
+                });
+            }
+
+            // 4. Acelerar y brillar el flujo a los demás nodos (Sanidad)
+            ['orders', 'auth'].forEach(key => {
+                const healthyPath = pathsMap[key];
+                if (healthyPath) {
+                    gsap.to(healthyPath.pMat.color, { r: 0.06, g: 0.72, b: 0.5, duration: 0.5 }); // Verde
+                    gsap.to(healthyPath.tube.material, { opacity: 0.6, duration: 0.5 });
+                    healthyPath.instances.forEach(inst => inst.speed *= 2);
+                }
+            });
         }
 
         function animHealthChecks() { 
