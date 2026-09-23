@@ -459,11 +459,30 @@
         controls.dampingFactor = 0.05;
         controls.maxDistance = 50;
 
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
+        // ============================
+        // ILUMINACIÓN DE ESTUDIO
+        // ============================
+        // Luz ambiente suave #f8fafc — sombras limpias sobre fondo blanco
+        const ambientLight = new THREE.AmbientLight(0xf8fafc, 0.6);
         scene.add(ambientLight);
-        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-        dirLight.position.set(10, 20, 10);
+
+        // Luz direccional principal — simula luz de estudio cenital
+        const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
+        dirLight.position.set(5, 10, 7);
         scene.add(dirLight);
+
+        // Luz fill trasera suave para evitar sombras duras
+        const fillLight = new THREE.DirectionalLight(0xffffff, 0.35);
+        fillLight.position.set(-8, -5, -10);
+        scene.add(fillLight);
+
+        // SpotLight de acento cian — resalta bordes acrílicos y glassmorphism
+        const accentSpot = new THREE.SpotLight(0x0284c7, 1.8, 120, Math.PI / 6, 0.5, 1.5);
+        accentSpot.position.set(-5, -8, 20);
+        accentSpot.target.position.set(10, 0, 0); // apunta al centro de microservicios
+        scene.add(accentSpot);
+        scene.add(accentSpot.target);
+
 
         // --- 1.5 ARQUITECTURA MONOLÍTICA LEGACY ---
         const legacyGroup = new THREE.Group();
@@ -783,51 +802,149 @@
             }
         });
 
-        // --- 3.5 CREACIÓN DE BASES DE DATOS STANDALONE ---
-        const databases = [
-            { id: 'pg', name: 'DB', brand: '#006cb5', pos: [10, 16, -8], parent: 'auth' },
-            { id: 'mongo', name: 'DB', brand: '#006cb5', pos: [16, 6, -3], parent: 'catalog' },
-            { id: 'redis', name: 'DB', brand: '#006cb5', pos: [16, -6, 3], parent: 'events' },
-            { id: 'db2', name: 'DB', brand: '#006cb5', pos: [10, -16, 8], parent: 'orders' }
-        ];
-        
-        const dbsMap = {};
+        // --- 3.5 ISLA DE INFRAESTRUCTURA (PLATAFORMA BASE COMPARTIDA) ---
+        // Posicion centrada bajo los microservicios
+        const infraCenter = new THREE.Vector3(10, 0, 0);
 
-        function createDatabase(data) {
-            const geo = new THREE.CylinderGeometry(1, 1, 1.5, 16);
-            const mat = new THREE.MeshStandardMaterial({ 
-                color: NEUTRAL_COLOR, emissive: NEUTRAL_COLOR, emissiveIntensity: 0.8,
-                transparent: true, opacity: 0.9, roughness: 0.2
+        // -- PODIO BASE: cilindro ancho y bajo, efecto glassmorphism --
+        const islandGeo = new THREE.CylinderGeometry(14, 14, 0.5, 64);
+        const islandMat = new THREE.MeshStandardMaterial({
+            color: 0xf8fafc, emissive: 0x0284c7, emissiveIntensity: 0.08,
+            transparent: true, opacity: 0.0, roughness: 0.1, metalness: 0.2
+        });
+        const islandMesh = new THREE.Mesh(islandGeo, islandMat);
+        islandMesh.position.copy(infraCenter);
+        islandMesh.position.y = -16.5;
+        scene.add(islandMesh);
+
+        // -- BORDE SUPERIOR EMISOR CIAN --
+        const islandRingGeo = new THREE.TorusGeometry(14, 0.12, 8, 80);
+        const islandRingMat = new THREE.MeshBasicMaterial({
+            color: 0x0284c7, transparent: true, opacity: 0.0
+        });
+        const islandRing = new THREE.Mesh(islandRingGeo, islandRingMat);
+        islandRing.rotation.x = Math.PI / 2;
+        islandRing.position.copy(islandMesh.position);
+        islandRing.position.y += 0.26;
+        scene.add(islandRing);
+
+        // -- SEGUNDO ANILLO INTERIOR --
+        const innerRingGeo = new THREE.TorusGeometry(9, 0.06, 8, 64);
+        const innerRingMat = new THREE.MeshBasicMaterial({
+            color: 0x0284c7, transparent: true, opacity: 0.0
+        });
+        const innerRing = new THREE.Mesh(innerRingGeo, innerRingMat);
+        innerRing.rotation.x = Math.PI / 2;
+        innerRing.position.copy(islandMesh.position);
+        innerRing.position.y += 0.26;
+        scene.add(innerRing);
+
+        // -- RAYOS DE LUZ VERTICALES: base de cada microservicio hacia la isla --
+        const infraBeams = [];
+        const beamTargets = ['auth', 'catalog', 'orders', 'events'];
+        beamTargets.forEach(id => {
+            const nodePos = new THREE.Vector3(...ecosystems[id].pos);
+            const beamHeight = nodePos.y - islandMesh.position.y;
+            const beamGeo = new THREE.CylinderGeometry(0.05, 0.2, Math.abs(beamHeight), 8);
+            const beamMat = new THREE.MeshBasicMaterial({
+                color: 0x0284c7, transparent: true, opacity: 0.0
             });
-            const mesh = new THREE.Mesh(geo, mat);
-            mesh.position.set(...data.pos);
-            mesh.scale.set(0.01, 0.01, 0.01); // Oculto inicialmente
-            scene.add(mesh);
+            const beam = new THREE.Mesh(beamGeo, beamMat);
+            beam.position.set(nodePos.x, islandMesh.position.y + Math.abs(beamHeight) / 2, nodePos.z);
+            scene.add(beam);
+            infraBeams.push(beam);
+        });
 
-            // Borde
-            const edges = new THREE.EdgesGeometry(geo);
-            const lineMat = new THREE.LineBasicMaterial({ color: 0x333333, transparent: true, opacity: 0.3 });
-            mesh.add(new THREE.LineSegments(edges, lineMat));
+        // -- BADGES DE BD SOBRE LA ISLA (HTML) --
+        const dbBadges = [
+            { text: '🐘 PostgreSQL', sub: 'journey-odm', offset: new THREE.Vector3(-3, 0.5, 2) },
+            { text: '🔵 DB2', sub: 'payments-odm', offset: new THREE.Vector3(3, 0.5, 4) },
+            { text: '⚡ Redis / AuthDB', sub: 'auth-app-odm', offset: new THREE.Vector3(0, 0.5, -3) }
+        ];
+        const infraBadgeDivs = [];
+        dbBadges.forEach(b => {
+            const div = document.createElement('div');
+            div.style.position = 'absolute';
+            div.style.background = 'rgba(255,255,255,0.97)';
+            div.style.border = '1px solid #e2e8f0';
+            div.style.borderLeft = '3px solid #0284c7';
+            div.style.padding = '5px 12px';
+            div.style.borderRadius = '20px';
+            div.style.fontSize = '0.72rem';
+            div.style.fontFamily = "'Inter', system-ui, sans-serif";
+            div.style.fontWeight = '700';
+            div.style.color = '#0f172a';
+            div.style.pointerEvents = 'none';
+            div.style.boxShadow = '0 4px 12px rgba(0,0,0,0.10)';
+            div.style.opacity = '0';
+            div.style.transition = 'opacity 0.5s';
+            div.style.transform = 'translate(-50%, -50%)';
+            div.style.zIndex = '46';
+            div.innerHTML = `${b.text}<br><span style="font-weight:400;color:#64748b;font-size:0.65rem">${b.sub}</span>`;
+            document.getElementById('labels-container').appendChild(div);
+            // Guardar offset 3D para la proyección
+            div._worldPos = new THREE.Vector3(
+                islandMesh.position.x + b.offset.x,
+                islandMesh.position.y + b.offset.y,
+                islandMesh.position.z + b.offset.z
+            );
+            infraBadgeDivs.push(div);
+        });
 
-            // Línea de Conexión
-            const parentPos = nodesMap[data.parent].targetPos;
-            const points = [parentPos, new THREE.Vector3(...data.pos)];
-            const lineGeo = new THREE.BufferGeometry().setFromPoints(points);
-            const connMat = new THREE.LineDashedMaterial({ color: 0x005691, transparent: true, opacity: 0, dashSize: 0.5, gapSize: 0.2, linewidth: 2 });
-            const line = new THREE.Line(lineGeo, connMat);
-            line.computeLineDistances();
-            scene.add(line);
+        // Guardamos referencias globales para usarlas en el loop animate
+        const infraIsland = { mesh: islandMesh, ring: islandRing, innerRing, beams: infraBeams, badges: infraBadgeDivs };
 
-            // Etiqueta
-            const label = document.createElement('div');
-            label.className = 'node-label';
-            label.innerText = data.name;
-            label.style.color = data.brand;
-            labelsContainer.appendChild(label);
+        // -- MICRO-ANOTACIÓN: AWS / EKS CLUSTER --
+        const clusterLabel = document.createElement('div');
+        clusterLabel.style.position = 'absolute';
+        clusterLabel.style.color = '#94a3b8';
+        clusterLabel.style.fontSize = '10px';
+        clusterLabel.style.fontFamily = "'Inter', monospace, system-ui";
+        clusterLabel.style.fontWeight = '500';
+        clusterLabel.style.letterSpacing = '0.1em';
+        clusterLabel.style.textTransform = 'uppercase';
+        clusterLabel.style.pointerEvents = 'none';
+        clusterLabel.style.opacity = '0';
+        clusterLabel.style.transition = 'opacity 0.5s';
+        clusterLabel.style.transform = 'translate(-50%, -50%)';
+        clusterLabel.style.zIndex = '46';
+        clusterLabel.innerText = '☁️ AWS / EKS CLUSTER — odm-core-prod';
+        document.getElementById('labels-container').appendChild(clusterLabel);
+        // Posición 3D: centro de la isla, ligeramente al frente
+        clusterLabel._worldPos = new THREE.Vector3(
+            islandMesh.position.x,
+            islandMesh.position.y + 0.5,
+            islandMesh.position.z + 5
+        );
+        infraIsland.clusterLabel = clusterLabel;
 
-            dbsMap[data.id] = { mesh, line, label, data };
+        // -- RIPPLE EXPANSIVO EN LA SUPERFICIE DE LA ISLA --
+        const rippleGeo = new THREE.RingGeometry(0.5, 0.8, 64);
+        const rippleMat = new THREE.MeshBasicMaterial({
+            color: 0x0284c7, transparent: true, opacity: 0.0, side: THREE.DoubleSide
+        });
+        const rippleMesh = new THREE.Mesh(rippleGeo, rippleMat);
+        rippleMesh.rotation.x = -Math.PI / 2;
+        rippleMesh.position.copy(islandMesh.position);
+        rippleMesh.position.y += 0.3;
+        scene.add(rippleMesh);
+        infraIsland.ripple = rippleMesh;
+        infraIsland.rippleActive = false;
+
+        // Disparar ripple cada 3 segundos
+        function triggerRipple() {
+            if (rippleMesh.material.opacity > 0.05) return; // ya activo
+            infraIsland.rippleActive = true;
+            rippleMesh.scale.set(0.5, 0.5, 0.5);
+            gsap.to(rippleMesh.scale, { x: 28, y: 28, z: 28, duration: 2.2, ease: "power1.out" });
+            gsap.fromTo(rippleMesh.material, { opacity: 0.7 }, { opacity: 0.0, duration: 2.2, ease: "power1.out",
+                onComplete: () => { infraIsland.rippleActive = false; }
+            });
         }
-        databases.forEach(db => createDatabase(db));
+        setInterval(triggerRipple, 3000);
+
+        const dbsMap = {}; // mantener vacío (ya no hay cilindros individuales)
+
 
         // --- 4. TUBERÍAS Y FLUJO DE DATOS ---
         const pathsMap = {};
@@ -937,28 +1054,41 @@
                 }
             });
 
-            // 3. Vuelo de Nodos de Microservicios (Salen disparados del Monolito)
+            // 3. Vuelo de Nodos de Microservicios
             Object.values(nodesMap).forEach((node) => {
                 if(node.id !== 'origin') {
-                    // Los microservicios vuelan desde el centro exactamente cuando el monolito estalla (delay 0.85s)
                     gsap.to(node.group.position, { x: node.targetPos.x, y: node.targetPos.y, z: node.targetPos.z, duration: 2.0, delay: 0.85, ease: "expo.out" });
                     gsap.to(node.group.scale, { x: 1, y: 1, z: 1, duration: 2.0, delay: 0.85, ease: "elastic.out(1, 0.5)" });
                 }
-                
                 if (node.healthBadge) {
                     setTimeout(() => node.healthBadge.style.opacity = '1', 3000);
                 }
             });
             
-            // Fade in Tubos y Líneas de DB
+            // Fade in Tubos y Partículas
             Object.values(pathsMap).forEach((path) => {
                 gsap.to(path.tube.material, { opacity: DIM_OPACITY, duration: 2, delay: 2.5 });
-                gsap.to(path.pMat, { opacity: 0.6, duration: 2, delay: 2.5 }); // Aparecen las partículas
+                gsap.to(path.pMat, { opacity: 0.6, duration: 2, delay: 2.5 });
             });
-            Object.values(dbsMap).forEach(db => {
-                gsap.to(db.mesh.scale, { x: 1, y: 1, z: 1, duration: 1.5, delay: 2.5, ease: "elastic.out(1, 0.5)" });
-                gsap.to(db.line.material, { opacity: 0.8, duration: 2, delay: 2.5 });
+
+            // ---- ISLA DE INFRAESTRUCTURA: aparece después de los microservicios ----
+            gsap.to(infraIsland.mesh.material, { opacity: 0.35, duration: 2.5, delay: 3.2, ease: "power2.out" });
+            gsap.to(infraIsland.ring.material, { opacity: 0.9, duration: 2.5, delay: 3.4, ease: "power2.out" });
+            gsap.to(infraIsland.innerRing.material, { opacity: 0.4, duration: 2.5, delay: 3.6, ease: "power2.out" });
+            // Rayos de luz
+            infraIsland.beams.forEach((beam, i) => {
+                gsap.to(beam.material, { opacity: 0.18, duration: 1.5, delay: 3.5 + i * 0.15, ease: "power2.out" });
             });
+            // Badges de BD
+            setTimeout(() => {
+                infraIsland.badges.forEach((div, i) => {
+                    setTimeout(() => div.style.opacity = '1', i * 200);
+                });
+                // Micro-anotación AWS/EKS aparece al final
+                setTimeout(() => {
+                    if (infraIsland.clusterLabel) infraIsland.clusterLabel.style.opacity = '1';
+                }, 700);
+            }, 4000);
         });
 
         // --- 5.1 TOUR GUIADO (STORYTELLING) ---
@@ -2660,20 +2790,35 @@ public class ResilienceConfig {
                 });
             });
 
-            // Animación y Etiquetas de las Bases de Datos
-            Object.values(dbsMap).forEach(db => {
-                db.mesh.rotation.y += 0.01;
-                
-                const dbPos = new THREE.Vector3();
-                db.mesh.getWorldPosition(dbPos);
-                dbPos.y += 1.8;
-                dbPos.project(camera);
-                const dbX = (dbPos.x * .5 + .5) * window.innerWidth;
-                const dbY = (dbPos.y * -.5 + .5) * window.innerHeight;
-                db.label.style.left = `${dbX}px`;
-                db.label.style.top = `${dbY}px`;
-                db.label.style.display = dbPos.z > 1 ? 'none' : 'block';
-            });
+            // Proyección de Badges de la Isla de Infraestructura
+            if (typeof infraIsland !== 'undefined') {
+                // Rotar anillos levemente para dar vida
+                infraIsland.ring.rotation.z += 0.001;
+                infraIsland.innerRing.rotation.z -= 0.0015;
+
+                // Proyectar badges de BD
+                infraIsland.badges.forEach(div => {
+                    if (!div._worldPos) return;
+                    const pos = div._worldPos.clone();
+                    pos.project(camera);
+                    const bX = (pos.x * 0.5 + 0.5) * window.innerWidth;
+                    const bY = (pos.y * -0.5 + 0.5) * window.innerHeight;
+                    div.style.left = `${bX}px`;
+                    div.style.top = `${bY}px`;
+                    div.style.display = pos.z > 1 ? 'none' : 'block';
+                });
+
+                // Proyectar micro-anotación AWS/EKS
+                if (infraIsland.clusterLabel && infraIsland.clusterLabel._worldPos) {
+                    const cPos = infraIsland.clusterLabel._worldPos.clone();
+                    cPos.project(camera);
+                    const cX = (cPos.x * 0.5 + 0.5) * window.innerWidth;
+                    const cY = (cPos.y * -0.5 + 0.5) * window.innerHeight;
+                    infraIsland.clusterLabel.style.left = `${cX}px`;
+                    infraIsland.clusterLabel.style.top = `${cY}px`;
+                    infraIsland.clusterLabel.style.display = cPos.z > 1 ? 'none' : 'block';
+                }
+            }
 
             // Flujo de Partículas
             Object.values(pathsMap).forEach(path => {
