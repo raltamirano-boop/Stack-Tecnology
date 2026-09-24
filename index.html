@@ -387,6 +387,7 @@
         <!-- Botones de Prueba -->
         <div id="fastapi-interactive-buttons" style="display: none; gap: 10px; margin-bottom: 15px;">
             <button id="btn-fastapi-sim" style="flex: 1; background: linear-gradient(135deg, #0078D4 0%, #00f2fe 100%); color: #ffffff; font-weight: 700; border: none; padding: 10px; border-radius: 6px; cursor: pointer; box-shadow: 0 4px 15px rgba(0, 242, 254, 0.4); text-transform: uppercase; font-size: 0.85rem; transition: transform 0.2s;">⚡ Simular 5,000 Búsquedas Simultáneas</button>
+            <button id="btn-fastapi-ia" style="display: none; flex: 1; background: linear-gradient(135deg, #a855f7 0%, #d946ef 100%); color: #ffffff; font-weight: 700; border: none; padding: 10px; border-radius: 6px; cursor: pointer; box-shadow: 0 4px 15px rgba(168, 85, 247, 0.4); text-transform: uppercase; font-size: 0.85rem; transition: transform 0.2s;">🤖 Ejecutar IA</button>
         </div>
 
         <!-- Navegación del Sub-Tour -->
@@ -2351,6 +2352,13 @@ class TripRequest(BaseModel):
                     fastapiAssets.aiNodes.children.forEach(child => {
                         if(child.material) gsap.to(child.material, { emissiveIntensity: 2, duration: 0.5, yoyo: true, repeat: -1, delay: Math.random() });
                     });
+                    
+                    // Bot holográfico
+                    if (fastapiAssets.aiBot) {
+                        fastapiAssets.aiBot.visible = true;
+                        fastapiAssets.aiBot.scale.set(0.01, 0.01, 0.01);
+                        gsap.to(fastapiAssets.aiBot.scale, { x: 1, y: 1, z: 1, duration: 0.8, ease: "back.out(1.5)" });
+                    }
                 }
             },
             {
@@ -2361,6 +2369,10 @@ class TripRequest(BaseModel):
                 tab: "endpoint",
                 action: () => {
                     fastapiAssets.aiNodes.visible = false;
+                    if(fastapiAssets.aiBot) fastapiAssets.aiBot.visible = false;
+                    const bubble = document.getElementById('fastapi-bot-bubble');
+                    if(bubble) bubble.style.display = 'none';
+                    
                     fastapiAssets.asyncPipe.visible = true;
                     gsap.fromTo(fastapiAssets.asyncPipe.scale, { z: 0.01 }, { z: 1, duration: 0.5, ease: "power2.out" });
                 }
@@ -2459,6 +2471,32 @@ class TripRequest(BaseModel):
             scene.add(fastapiAssets.asyncPipe);
             fastapiAssets.asyncPipe.visible = false;
 
+            // 6. Robot Holográfico (IA Bot)
+            fastapiAssets.aiBot = new THREE.Group();
+            
+            const botCoreGeo = new THREE.SphereGeometry(0.3, 16, 16);
+            const botCoreMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.9 });
+            const botCore = new THREE.Mesh(botCoreGeo, botCoreMat);
+            
+            const botHaloGeo = new THREE.TorusGeometry(0.5, 0.05, 8, 24);
+            const botHaloMat = new THREE.MeshBasicMaterial({ color: 0xa855f7, transparent: true, opacity: 0.8 });
+            fastapiAssets.aiBotHalo = new THREE.Mesh(botHaloGeo, botHaloMat);
+            fastapiAssets.aiBotHalo.rotation.x = Math.PI / 2;
+            
+            const botLaserGeo = new THREE.ConeGeometry(0.8, 3, 16);
+            botLaserGeo.translate(0, -1.5, 0);
+            const botLaserMat = new THREE.MeshBasicMaterial({ color: 0xd946ef, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false });
+            fastapiAssets.aiBotLaser = new THREE.Mesh(botLaserGeo, botLaserMat);
+            
+            fastapiAssets.aiBot.add(botCore);
+            fastapiAssets.aiBot.add(fastapiAssets.aiBotHalo);
+            fastapiAssets.aiBot.add(fastapiAssets.aiBotLaser);
+            
+            fastapiAssets.aiBot.position.copy(node.targetPos);
+            fastapiAssets.aiBot.position.y += 2.5;
+            scene.add(fastapiAssets.aiBot);
+            fastapiAssets.aiBot.visible = false;
+
             fastapiAssets.initialized = true;
         }
 
@@ -2482,8 +2520,20 @@ class TripRequest(BaseModel):
             document.getElementById('fastapi-code-content').innerText = fastapiTourCodeSnippets[step.tab];
 
             const btnContainer = document.getElementById('fastapi-interactive-buttons');
-            if (currentFastAPIStep === 6 || currentFastAPIStep === 1 || currentFastAPIStep === 2) {
+            const simBtn = document.getElementById('btn-fastapi-sim');
+            const iaBtn = document.getElementById('btn-fastapi-ia');
+            if (currentFastAPIStep === 1 || currentFastAPIStep === 2) {
                 btnContainer.style.display = 'flex';
+                if(simBtn) simBtn.style.display = 'block';
+                if(iaBtn) iaBtn.style.display = 'none';
+            } else if (currentFastAPIStep === 4) {
+                btnContainer.style.display = 'flex';
+                if(simBtn) simBtn.style.display = 'none';
+                if(iaBtn) iaBtn.style.display = 'block';
+            } else if (currentFastAPIStep === 6) {
+                btnContainer.style.display = 'flex';
+                if(simBtn) simBtn.style.display = 'block';
+                if(iaBtn) iaBtn.style.display = 'none';
             } else {
                 btnContainer.style.display = 'none';
             }
@@ -2519,6 +2569,10 @@ class TripRequest(BaseModel):
             if(fastapiAssets.hologram) fastapiAssets.hologram.visible = false;
             if(fastapiAssets.aiNodes) fastapiAssets.aiNodes.visible = false;
             if(fastapiAssets.asyncPipe) fastapiAssets.asyncPipe.visible = false;
+            if(fastapiAssets.aiBot) fastapiAssets.aiBot.visible = false;
+            
+            const bubble = document.getElementById('fastapi-bot-bubble');
+            if (bubble) bubble.style.display = 'none';
             
             // Regresar cámara al centro panorámico si no hay otro tour activo
             if (!isNestTourActive && !isFastAPITourActive && !isSpringTourActive) {
@@ -2628,6 +2682,45 @@ class TripRequest(BaseModel):
                 gsap.to(node.coreMesh.scale, { x: 1, y: 1, z: 1, duration: 0.5 });
                 gsap.to(hud, { opacity: 0, duration: 0.5, delay: 1, onComplete: () => { hud.style.display = 'none'; }});
             }, 3000);
+        });
+
+        // Event listener para IA Bot
+        document.getElementById('btn-fastapi-ia')?.addEventListener('click', () => {
+            if (!fastapiAssets.aiBot || !fastapiAssets.aiBot.visible) return;
+            
+            // Animación de Láser
+            gsap.fromTo(fastapiAssets.aiBotLaser.material, { opacity: 0.6 }, { opacity: 0, duration: 1.5, ease: "power2.inOut" });
+            
+            // Speech Bubble Holográfico
+            let bubble = document.getElementById('fastapi-bot-bubble');
+            if (!bubble) {
+                bubble = document.createElement('div');
+                bubble.id = 'fastapi-bot-bubble';
+                bubble.style.position = 'absolute';
+                bubble.style.background = 'rgba(20, 0, 40, 0.85)';
+                bubble.style.border = '1px solid #a855f7';
+                bubble.style.borderRadius = '12px 12px 12px 0px';
+                bubble.style.padding = '10px 15px';
+                bubble.style.color = '#e9d5ff';
+                bubble.style.fontWeight = 'bold';
+                bubble.style.fontSize = '0.9rem';
+                bubble.style.boxShadow = '0 5px 15px rgba(168, 85, 247, 0.4)';
+                bubble.style.transform = 'translate(10%, -120%)';
+                bubble.style.pointerEvents = 'none';
+                bubble.style.zIndex = '60';
+                bubble.style.backdropFilter = 'blur(4px)';
+                document.body.appendChild(bubble);
+            }
+            
+            bubble.innerHTML = `🤖 "¡Precios optimizados! Ocupación proyectada: 88%"`;
+            bubble.style.display = 'block';
+            bubble.style.opacity = '0';
+            
+            gsap.to(bubble, { opacity: 1, duration: 0.3 });
+            
+            setTimeout(() => {
+                gsap.to(bubble, { opacity: 0, duration: 0.5, onComplete: () => { bubble.style.display = 'none'; }});
+            }, 4000);
         });
 
         // --- 6.7 SPRING BOOT SUB-TOUR (8 PASOS) ---
@@ -3134,6 +3227,24 @@ public class ResilienceConfig {
                         hud.style.top = `${(hudPos.y * -.5 + .5) * window.innerHeight}px`;
                         // Ocultar si está detrás de la cámara
                         if (hudPos.z > 1) hud.style.display = 'none';
+                    }
+                    
+                    // IA Bot update
+                    if (fastapiAssets.aiBot && fastapiAssets.aiBot.visible) {
+                        fastapiAssets.aiBotHalo.rotation.z += 0.05;
+                        fastapiAssets.aiBotHalo.rotation.x = Math.PI / 2 + Math.sin(time * 2) * 0.2;
+                        fastapiAssets.aiBot.position.y = node.targetPos.y + 2.5 + Math.sin(time * 3) * 0.2;
+                        
+                        const bubble = document.getElementById('fastapi-bot-bubble');
+                        if (bubble && bubble.style.display !== 'none') {
+                            const bPos = new THREE.Vector3();
+                            fastapiAssets.aiBot.getWorldPosition(bPos);
+                            bPos.y += 0.8;
+                            bPos.project(camera);
+                            bubble.style.left = `${(bPos.x * .5 + .5) * window.innerWidth}px`;
+                            bubble.style.top = `${(bPos.y * -.5 + .5) * window.innerHeight}px`;
+                            if (bPos.z > 1) bubble.style.display = 'none';
+                        }
                     }
                 }
 
