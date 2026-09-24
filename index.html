@@ -387,6 +387,7 @@
         <!-- Botones de Prueba -->
         <div id="fastapi-interactive-buttons" style="display: none; gap: 10px; margin-bottom: 15px;">
             <button id="btn-fastapi-sim" style="flex: 1; background: linear-gradient(135deg, #0078D4 0%, #00f2fe 100%); color: #ffffff; font-weight: 700; border: none; padding: 10px; border-radius: 6px; cursor: pointer; box-shadow: 0 4px 15px rgba(0, 242, 254, 0.4); text-transform: uppercase; font-size: 0.85rem; transition: transform 0.2s;">⚡ Simular 5,000 Búsquedas Simultáneas</button>
+            <button id="btn-fastapi-pydantic" style="display: none; flex: 1; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; font-weight: 700; border: none; padding: 10px; border-radius: 6px; cursor: pointer; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4); text-transform: uppercase; font-size: 0.85rem; transition: transform 0.2s;">🛡️ Simular Petición Inválida (Pydantic Filter)</button>
             <button id="btn-fastapi-ia" style="display: none; flex: 1; background: linear-gradient(135deg, #a855f7 0%, #d946ef 100%); color: #ffffff; font-weight: 700; border: none; padding: 10px; border-radius: 6px; cursor: pointer; box-shadow: 0 4px 15px rgba(168, 85, 247, 0.4); text-transform: uppercase; font-size: 0.85rem; transition: transform 0.2s;">🤖 Ejecutar IA</button>
         </div>
 
@@ -2380,7 +2381,7 @@ class TripRequest(BaseModel):
             {
                 title: "6. Benchmarks de Alto Rendimiento",
                 subtitle: "",
-                desc: "FastAPI es reconocido como uno de los frameworks de Python más rápidos de la historia, a la par de NodeJS y Go. Es capaz de sostener cargas masivas durante temporadas altas (Hot Sale, Vacaciones) sin degradar el servicio.",
+                desc: "FastAPI es reconocido como uno de los frameworks de Python más rápidos de la historia,Es capaz de sostener cargas masivas durante temporadas altas (Hot Sale, Vacaciones) sin degradar el servicio.",
                 metric: "🔥 Rendimiento: Top Tier Python Frameworks",
                 tab: "endpoint",
                 action: () => {
@@ -2430,6 +2431,15 @@ class TripRequest(BaseModel):
             fastapiAssets.scanner.rotation.x = Math.PI / 2;
             node.group.add(fastapiAssets.scanner);
             fastapiAssets.scanner.visible = false;
+
+            // 2.b Pydantic Shield (Escudo de Validación)
+            const shieldGeo = new THREE.PlaneGeometry(2, 2);
+            const shieldMat = new THREE.MeshBasicMaterial({ color: 0x00f2fe, transparent: true, opacity: 0.6, side: THREE.DoubleSide, blending: THREE.AdditiveBlending });
+            fastapiAssets.pydanticShield = new THREE.Mesh(shieldGeo, shieldMat);
+            fastapiAssets.pydanticShield.position.set(-1.5, 0, 0); // Cara izquierda (entrada de la tubería)
+            fastapiAssets.pydanticShield.rotation.y = Math.PI / 2;
+            node.group.add(fastapiAssets.pydanticShield);
+            fastapiAssets.pydanticShield.visible = false;
 
             // 3. Hologram (OpenAPI)
             const holoGeo = new THREE.PlaneGeometry(2, 1.5);
@@ -2521,18 +2531,27 @@ class TripRequest(BaseModel):
 
             const btnContainer = document.getElementById('fastapi-interactive-buttons');
             const simBtn = document.getElementById('btn-fastapi-sim');
+            const pydanticBtn = document.getElementById('btn-fastapi-pydantic');
             const iaBtn = document.getElementById('btn-fastapi-ia');
-            if (currentFastAPIStep === 1 || currentFastAPIStep === 2) {
+            if (currentFastAPIStep === 1) { // Paso 2: Concurrencia
                 btnContainer.style.display = 'flex';
                 if(simBtn) simBtn.style.display = 'block';
+                if(pydanticBtn) pydanticBtn.style.display = 'none';
                 if(iaBtn) iaBtn.style.display = 'none';
-            } else if (currentFastAPIStep === 4) {
+            } else if (currentFastAPIStep === 2) { // Paso 3: Pydantic
                 btnContainer.style.display = 'flex';
                 if(simBtn) simBtn.style.display = 'none';
+                if(pydanticBtn) pydanticBtn.style.display = 'block';
+                if(iaBtn) iaBtn.style.display = 'none';
+            } else if (currentFastAPIStep === 4) { // Paso 5: IA
+                btnContainer.style.display = 'flex';
+                if(simBtn) simBtn.style.display = 'none';
+                if(pydanticBtn) pydanticBtn.style.display = 'none';
                 if(iaBtn) iaBtn.style.display = 'block';
-            } else if (currentFastAPIStep === 6) {
+            } else if (currentFastAPIStep === 6) { // Paso 7: Benchmarks
                 btnContainer.style.display = 'flex';
                 if(simBtn) simBtn.style.display = 'block';
+                if(pydanticBtn) pydanticBtn.style.display = 'none';
                 if(iaBtn) iaBtn.style.display = 'none';
             } else {
                 btnContainer.style.display = 'none';
@@ -2570,9 +2589,13 @@ class TripRequest(BaseModel):
             if(fastapiAssets.aiNodes) fastapiAssets.aiNodes.visible = false;
             if(fastapiAssets.asyncPipe) fastapiAssets.asyncPipe.visible = false;
             if(fastapiAssets.aiBot) fastapiAssets.aiBot.visible = false;
+            if(fastapiAssets.pydanticShield) fastapiAssets.pydanticShield.visible = false;
             
             const bubble = document.getElementById('fastapi-bot-bubble');
             if (bubble) bubble.style.display = 'none';
+
+            const pydanticBadge = document.getElementById('fastapi-pydantic-badge');
+            if (pydanticBadge) pydanticBadge.style.display = 'none';
             
             // Regresar cámara al centro panorámico si no hay otro tour activo
             if (!isNestTourActive && !isFastAPITourActive && !isSpringTourActive) {
@@ -2682,6 +2705,78 @@ class TripRequest(BaseModel):
                 gsap.to(node.coreMesh.scale, { x: 1, y: 1, z: 1, duration: 0.5 });
                 gsap.to(hud, { opacity: 0, duration: 0.5, delay: 1, onComplete: () => { hud.style.display = 'none'; }});
             }, 3000);
+        });
+
+        // Event listener para Simulación Pydantic
+        document.getElementById('btn-fastapi-pydantic')?.addEventListener('click', () => {
+            const node = nodesMap['catalog'];
+            
+            // 1. Mostrar Escudo
+            if(fastapiAssets.pydanticShield) {
+                fastapiAssets.pydanticShield.visible = true;
+                fastapiAssets.pydanticShield.scale.set(1, 0.01, 1);
+                gsap.to(fastapiAssets.pydanticShield.scale, { y: 1, duration: 0.3, ease: "back.out(1.5)" });
+                gsap.to(fastapiAssets.pydanticShield.material, { opacity: 0.8, duration: 0.3, yoyo: true, repeat: 3 });
+            }
+
+            // 2. Crear partícula roja malformada
+            const geo = new THREE.SphereGeometry(0.2, 8, 8);
+            const mat = new THREE.MeshBasicMaterial({ color: 0xef4444 });
+            const badParticle = new THREE.Mesh(geo, mat);
+            badParticle.position.set(-6, 0, 0); // Empieza lejos en la tubería
+            node.group.add(badParticle);
+
+            // Animar partícula hacia el escudo (-1.5)
+            gsap.to(badParticle.position, { x: -1.6, duration: 0.6, ease: "power2.in", onComplete: () => {
+                // Choque y disipación (chispas)
+                gsap.to(badParticle.scale, { x: 3, y: 3, z: 3, duration: 0.2 });
+                gsap.to(badParticle.material, { opacity: 0, duration: 0.2, transparent: true, onComplete: () => {
+                    node.group.remove(badParticle);
+                }});
+
+                // 3. Mostrar Badge
+                let badge = document.getElementById('fastapi-pydantic-badge');
+                if (!badge) {
+                    badge = document.createElement('div');
+                    badge.id = 'fastapi-pydantic-badge';
+                    badge.style.position = 'absolute';
+                    badge.style.background = 'rgba(239, 68, 68, 0.9)'; // Rojo alerta
+                    badge.style.border = '2px solid #f87171';
+                    badge.style.borderRadius = '6px';
+                    badge.style.padding = '8px 12px';
+                    badge.style.color = 'white';
+                    badge.style.fontWeight = 'bold';
+                    badge.style.fontSize = '0.85rem';
+                    badge.style.boxShadow = '0 5px 15px rgba(239, 68, 68, 0.4)';
+                    badge.style.transform = 'translate(-50%, -50%)';
+                    badge.style.pointerEvents = 'none';
+                    badge.style.zIndex = '60';
+                    badge.style.backdropFilter = 'blur(4px)';
+                    badge.innerHTML = `🛡️ Pydantic Block: Fecha Inválida → HTTP 422 (0.2 ms)`;
+                    document.body.appendChild(badge);
+                }
+                
+                badge.style.display = 'block';
+                badge.style.opacity = '0';
+                
+                // Posicionar badge sobre el escudo
+                const bPos = new THREE.Vector3(-1.5, 1.5, 0);
+                bPos.applyMatrix4(node.group.matrixWorld);
+                bPos.project(camera);
+                badge.style.left = `${(bPos.x * .5 + .5) * window.innerWidth}px`;
+                badge.style.top = `${(bPos.y * -.5 + .5) * window.innerHeight}px`;
+
+                gsap.to(badge, { opacity: 1, duration: 0.2, y: -20 });
+                
+                setTimeout(() => {
+                    gsap.to(badge, { opacity: 0, duration: 0.5, onComplete: () => { badge.style.display = 'none'; }});
+                    if(fastapiAssets.pydanticShield) {
+                        gsap.to(fastapiAssets.pydanticShield.scale, { y: 0.01, duration: 0.3, onComplete: () => {
+                            fastapiAssets.pydanticShield.visible = false;
+                        }});
+                    }
+                }, 3000);
+            }});
         });
 
         // Event listener para IA Bot
