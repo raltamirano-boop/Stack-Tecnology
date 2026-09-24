@@ -389,6 +389,7 @@
             <button id="btn-fastapi-sim" style="flex: 1; background: linear-gradient(135deg, #0078D4 0%, #00f2fe 100%); color: #ffffff; font-weight: 700; border: none; padding: 10px; border-radius: 6px; cursor: pointer; box-shadow: 0 4px 15px rgba(0, 242, 254, 0.4); text-transform: uppercase; font-size: 0.85rem; transition: transform 0.2s;">⚡ Simular 5,000 Búsquedas Simultáneas</button>
             <button id="btn-fastapi-pydantic" style="display: none; flex: 1; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; font-weight: 700; border: none; padding: 10px; border-radius: 6px; cursor: pointer; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4); text-transform: uppercase; font-size: 0.85rem; transition: transform 0.2s;">🛡️ Simular Petición Inválida (Pydantic Filter)</button>
             <button id="btn-fastapi-ia" style="display: none; flex: 1; background: linear-gradient(135deg, #a855f7 0%, #d946ef 100%); color: #ffffff; font-weight: 700; border: none; padding: 10px; border-radius: 6px; cursor: pointer; box-shadow: 0 4px 15px rgba(168, 85, 247, 0.4); text-transform: uppercase; font-size: 0.85rem; transition: transform 0.2s;">🤖 Ejecutar IA</button>
+            <button id="btn-fastapi-db" style="display: none; flex: 1; background: linear-gradient(135deg, #0078D4 0%, #00f2fe 100%); color: #ffffff; font-weight: 700; border: none; padding: 10px; border-radius: 6px; cursor: pointer; box-shadow: 0 4px 15px rgba(0, 242, 254, 0.4); text-transform: uppercase; font-size: 0.85rem; transition: transform 0.2s;">🛢️ Simular Consultas Asíncronas a BD</button>
         </div>
 
         <!-- Navegación del Sub-Tour -->
@@ -2481,6 +2482,28 @@ class TripRequest(BaseModel):
             scene.add(fastapiAssets.asyncPipe);
             fastapiAssets.asyncPipe.visible = false;
 
+            // Partículas Async DB
+            fastapiAssets.asyncDBParticles = new THREE.Group();
+            for(let i=0; i<30; i++) {
+                const pGeo = new THREE.SphereGeometry(0.12, 8, 8);
+                const pMat = new THREE.MeshBasicMaterial({ color: 0x00f2fe });
+                const pMesh = new THREE.Mesh(pGeo, pMat);
+                pMesh.position.z = (Math.random() - 0.5) * startPos.distanceTo(dbPos);
+                // Distribuir en un radio alrededor del centro para que no choquen
+                const radius = 0.2;
+                const angle = Math.random() * Math.PI * 2;
+                pMesh.position.x = Math.cos(angle) * radius;
+                pMesh.position.y = Math.sin(angle) * radius;
+                // userData para animar ida y vuelta
+                pMesh.userData = {
+                    speed: (Math.random() * 0.05 + 0.05) * (Math.random() > 0.5 ? 1 : -1),
+                    halfLength: startPos.distanceTo(dbPos) / 2
+                };
+                fastapiAssets.asyncDBParticles.add(pMesh);
+            }
+            fastapiAssets.asyncPipe.add(fastapiAssets.asyncDBParticles);
+            fastapiAssets.asyncDBParticles.visible = false;
+
             // 6. Robot Holográfico (IA Bot)
             fastapiAssets.aiBot = new THREE.Group();
             
@@ -2533,26 +2556,37 @@ class TripRequest(BaseModel):
             const simBtn = document.getElementById('btn-fastapi-sim');
             const pydanticBtn = document.getElementById('btn-fastapi-pydantic');
             const iaBtn = document.getElementById('btn-fastapi-ia');
+            const dbBtn = document.getElementById('btn-fastapi-db');
             if (currentFastAPIStep === 1) { // Paso 2: Concurrencia
                 btnContainer.style.display = 'flex';
                 if(simBtn) simBtn.style.display = 'block';
                 if(pydanticBtn) pydanticBtn.style.display = 'none';
                 if(iaBtn) iaBtn.style.display = 'none';
+                if(dbBtn) dbBtn.style.display = 'none';
             } else if (currentFastAPIStep === 2) { // Paso 3: Pydantic
                 btnContainer.style.display = 'flex';
                 if(simBtn) simBtn.style.display = 'none';
                 if(pydanticBtn) pydanticBtn.style.display = 'block';
                 if(iaBtn) iaBtn.style.display = 'none';
+                if(dbBtn) dbBtn.style.display = 'none';
             } else if (currentFastAPIStep === 4) { // Paso 5: IA
                 btnContainer.style.display = 'flex';
                 if(simBtn) simBtn.style.display = 'none';
                 if(pydanticBtn) pydanticBtn.style.display = 'none';
                 if(iaBtn) iaBtn.style.display = 'block';
+                if(dbBtn) dbBtn.style.display = 'none';
+            } else if (currentFastAPIStep === 5) { // Paso 6: Async DB
+                btnContainer.style.display = 'flex';
+                if(simBtn) simBtn.style.display = 'none';
+                if(pydanticBtn) pydanticBtn.style.display = 'none';
+                if(iaBtn) iaBtn.style.display = 'none';
+                if(dbBtn) dbBtn.style.display = 'block';
             } else if (currentFastAPIStep === 6) { // Paso 7: Benchmarks
                 btnContainer.style.display = 'flex';
                 if(simBtn) simBtn.style.display = 'block';
                 if(pydanticBtn) pydanticBtn.style.display = 'none';
                 if(iaBtn) iaBtn.style.display = 'none';
+                if(dbBtn) dbBtn.style.display = 'none';
             } else {
                 btnContainer.style.display = 'none';
             }
@@ -2590,12 +2624,16 @@ class TripRequest(BaseModel):
             if(fastapiAssets.asyncPipe) fastapiAssets.asyncPipe.visible = false;
             if(fastapiAssets.aiBot) fastapiAssets.aiBot.visible = false;
             if(fastapiAssets.pydanticShield) fastapiAssets.pydanticShield.visible = false;
+            if(fastapiAssets.asyncDBParticles) fastapiAssets.asyncDBParticles.visible = false;
             
             const bubble = document.getElementById('fastapi-bot-bubble');
             if (bubble) bubble.style.display = 'none';
 
             const pydanticBadge = document.getElementById('fastapi-pydantic-badge');
             if (pydanticBadge) pydanticBadge.style.display = 'none';
+
+            const dbBadge = document.getElementById('fastapi-db-badge');
+            if (dbBadge) dbBadge.style.display = 'none';
             
             // Regresar cámara al centro panorámico si no hay otro tour activo
             if (!isNestTourActive && !isFastAPITourActive && !isSpringTourActive) {
@@ -2816,6 +2854,60 @@ class TripRequest(BaseModel):
             setTimeout(() => {
                 gsap.to(bubble, { opacity: 0, duration: 0.5, onComplete: () => { bubble.style.display = 'none'; }});
             }, 4000);
+        });
+
+        // Event listener para Simulación Async DB
+        document.getElementById('btn-fastapi-db')?.addEventListener('click', () => {
+            if (!fastapiAssets.asyncPipe || !fastapiAssets.asyncPipe.visible) return;
+            
+            // Iluminar la tubería con Cyan
+            const cyan = new THREE.Color(0x00f2fe);
+            const orig = new THREE.Color(0x059669);
+            gsap.to(fastapiAssets.asyncPipe.material.color, { r: cyan.r, g: cyan.g, b: cyan.b, duration: 0.3, yoyo: true, repeat: 5, onComplete: () => {
+                gsap.to(fastapiAssets.asyncPipe.material.color, { r: orig.r, g: orig.g, b: orig.b, duration: 0.5 });
+            }});
+            gsap.to(fastapiAssets.asyncPipe.material, { opacity: 1, duration: 0.3, yoyo: true, repeat: 5, onComplete: () => {
+                gsap.to(fastapiAssets.asyncPipe.material, { opacity: 0.8, duration: 0.5 });
+            }});
+
+            // Mostrar partículas
+            fastapiAssets.asyncDBParticles.visible = true;
+
+            // HUD Holográfico de I/O
+            let badge = document.getElementById('fastapi-db-badge');
+            if (!badge) {
+                badge = document.createElement('div');
+                badge.id = 'fastapi-db-badge';
+                badge.style.position = 'absolute';
+                badge.style.background = 'rgba(15, 23, 42, 0.9)'; // Oscuro
+                badge.style.border = '2px solid #00f2fe';
+                badge.style.borderRadius = '8px';
+                badge.style.padding = '12px 16px';
+                badge.style.color = 'white';
+                badge.style.fontWeight = 'bold';
+                badge.style.fontSize = '0.9rem';
+                badge.style.boxShadow = '0 5px 20px rgba(0, 242, 254, 0.4)';
+                badge.style.transform = 'translate(-50%, -50%)';
+                badge.style.pointerEvents = 'none';
+                badge.style.zIndex = '60';
+                badge.style.backdropFilter = 'blur(4px)';
+                badge.innerHTML = `
+                    <div style="font-size: 1.1rem; color: #00f2fe; margin-bottom: 5px;">🛢️ SQLAlchemy 2.0 Async + asyncpg</div>
+                    <div style="font-size: 0.85rem; color: #10b981;">Pool: 50 Queries Activas</div>
+                    <div style="font-size: 0.85rem; color: #10b981;">Latencia I/O: < 8ms (Fast)</div>
+                `;
+                document.body.appendChild(badge);
+            }
+            
+            badge.style.display = 'block';
+            badge.style.opacity = '0';
+            
+            gsap.to(badge, { opacity: 1, duration: 0.3 });
+            
+            setTimeout(() => {
+                gsap.to(badge, { opacity: 0, duration: 0.5, onComplete: () => { badge.style.display = 'none'; }});
+                fastapiAssets.asyncDBParticles.visible = false;
+            }, 5000);
         });
 
         // --- 6.7 SPRING BOOT SUB-TOUR (8 PASOS) ---
@@ -3339,6 +3431,26 @@ public class ResilienceConfig {
                             bubble.style.left = `${(bPos.x * .5 + .5) * window.innerWidth}px`;
                             bubble.style.top = `${(bPos.y * -.5 + .5) * window.innerHeight}px`;
                             if (bPos.z > 1) bubble.style.display = 'none';
+                        }
+                    }
+
+                    // Async DB Particles update
+                    if (fastapiAssets.asyncDBParticles && fastapiAssets.asyncDBParticles.visible) {
+                        fastapiAssets.asyncDBParticles.children.forEach(p => {
+                            p.position.z += p.userData.speed;
+                            if (Math.abs(p.position.z) > p.userData.halfLength) {
+                                p.userData.speed *= -1; // Bounce back
+                            }
+                        });
+
+                        const dbBadge = document.getElementById('fastapi-db-badge');
+                        if (dbBadge && dbBadge.style.display !== 'none') {
+                            const badgePos = new THREE.Vector3();
+                            fastapiAssets.asyncPipe.getWorldPosition(badgePos);
+                            badgePos.project(camera);
+                            dbBadge.style.left = `${(badgePos.x * .5 + .5) * window.innerWidth}px`;
+                            dbBadge.style.top = `${(badgePos.y * -.5 + .5) * window.innerHeight}px`;
+                            if (badgePos.z > 1) dbBadge.style.display = 'none';
                         }
                     }
                 }
